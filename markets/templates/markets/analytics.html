@@ -1,0 +1,28 @@
+{% extends "markets/layout.html" %}
+{% load static %}
+{% block body %}
+
+    <button class="button is-normal is-responsive" id="btn_start_charting_01">
+        Start Charting
+    </button>
+
+    <button class="button is-normal is-responsive" id="btn_stop_charting_01">
+        Stop
+    </button>
+    <div class="container">
+
+        <div class="row">
+            <div class="col">Current Buy Offer<strong>
+                <div id="div_buy_price_01"></div>
+            </strong></div>
+            <div class="col">Current Rolling Average<strong>
+                <div id="div_rolling_avg_01"></div>
+            </strong></div>
+        </div>
+    </div>
+    <div id="chart">
+    </div>
+    {% block script %}
+        <script src="{% static 'markets/analytics.js' %}"></script>
+    {% endblock %}
+{% endblock %}
