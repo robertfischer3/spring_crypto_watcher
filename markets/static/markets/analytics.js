@@ -13,18 +13,31 @@ document.addEventListener('DOMContentLoaded', function () {
         socket.onopen = openWebSocket;
     });
 
-
     document.querySelector('#btn_stop_charting_01').addEventListener('click', function () {
         socket.close();
     });
 
 });
 
+function rowHandler(event){
+    console.log(`rowHandler event ${event.data}`);
+    const eventData = JSON.parse(event.data);
+     if (eventData.type && eventData.type === "l2update") {
+         if (eventData.changes[0][0]) {
+             //Add a new row to the table
+             addNewRow(eventData);
+             //Delete any rows greater than 50
+             deleteRow();
 
+         }
+     }
+}
 function openWebSocket() {
 
-    socket.addEventListener('message', (event) => {
+    socket.addEventListener('message', (event)=>{rowHandler(event); } );
 
+    socket.addEventListener('message', (event) => {
+        console.log('Message from server ', event.data);
         if (data.length > 50) {
             data.shift();
         }
@@ -35,24 +48,26 @@ function openWebSocket() {
         if (eventData.type && eventData.type === "l2update") {
             if (eventData.product_id && eventData.product_id === "ETH-USD") {
                 if (eventData.changes && eventData.changes.length === 1) {
-                    if (eventData.changes[0][0] && eventData.changes[0][0] === 'buy') {
 
-                        data.push(eventData.changes[0][1]);
-                        rollingAvg.push(Number(eventData.changes[0][1]));
+                        if (eventData.changes[0][0] === 'buy') {
 
-                        document.querySelector("#div_buy_price_01").innerHTML = eventData.changes[0][1];
-                        const avg = rollingAvg.reduce((a, b) => a + b) / rollingAvg.length
+                            data.push(eventData.changes[0][1]);
+                            rollingAvg.push(Number(eventData.changes[0][1]));
 
-                        document.querySelector("#div_rolling_avg_01").innerHTML = avg.toFixed((2));
+                            document.querySelector("#div_buy_price_01").innerHTML = eventData.changes[0][1];
+                            const avg = rollingAvg.reduce((a, b) => a + b) / rollingAvg.length
 
-                        chart.updateOptions({
-                            yaxis: {
-                                min: (avg - 50),
-                                max: (avg + 50)
-                            }
-                        });
+                            document.querySelector("#div_rolling_avg_01").innerHTML = avg.toFixed((2));
 
-                    }
+                            chart.updateOptions({
+                                yaxis: {
+                                    min: (avg - 5),
+                                    max: (avg + 5)
+                                }
+                            });
+
+                        }
+
                 }
 
             }
@@ -121,7 +136,7 @@ function initializeChart() {
             size: 0
         },
         yaxis: {
-            max: 100
+            max: 2000
         },
         legend: {
             show: false
@@ -130,3 +145,68 @@ function initializeChart() {
 
     return options;
 }
+
+/* This method will delete a row */
+function deleteRow(rowElement) {
+    const table = document.querySelector('#incoming_action_table_01');
+    const rowCount = table.rows.length;
+    if (rowCount <= 1) {
+        return;
+    }
+    if (rowCount >= 50) {
+
+        if (rowElement) {
+            //delete specific row
+            rowElement.parentNode.parentNode.remove();
+        } else {
+            //delete last row
+            table.deleteRow(rowCount - 1);
+        }
+    }
+}
+
+/* This method will add a new row */
+function addNewRow(eventData) {
+
+    const table = document.querySelector("#incoming_action_table_01");
+    const rowCount = table.rows.length;
+    const cellCount = table.rows[0].cells.length;
+
+    if (eventData.type && eventData.type === "l2update") {
+        if (eventData.product_id) {
+            if (eventData.changes && eventData.changes.length === 1) {
+                if (eventData.changes[0][0]) {
+                    // Add new rows to the top of the table
+                    const row = table.insertRow(0);
+                    if (cellCount) {
+                        const cellChange = row.insertCell(0);
+                        cellChange.innerHTML = eventData.changes[0][0];
+
+                        const cellPrice = row.insertCell(1);
+                        cellPrice.innerHTML = eventData.changes[0][1];
+                        const cellVolume = row.insertCell(2);
+                        cellVolume.innerHTML = eventData.changes[0][2];
+                        const cellTime = row.insertCell(3);
+                        const date = new Date(eventData.time);
+                        cellTime.innerHTML = date.toString()
+
+                         if (cellChange.innerHTML === 'buy')
+                        {
+                            cellChange.className = "text-primary";
+                        }
+                        else if (cellChange.innerHTML === 'sell'){
+
+                            cellChange.className = "text-success";
+                        }
+
+                    }
+                }
+            }
+        }
+    } else {
+        return false;
+    }
+
+
+}
+

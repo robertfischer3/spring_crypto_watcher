@@ -1,7 +1,19 @@
 {% extends "markets/layout.html" %}
 {% load static %}
 {% block body %}
+    <p> Select a exchange to track:
+        <select id="select_cryptocurrency_01">
+            <option value="ETH-USD">ETH-USD</option>
+            <option value="ETH-BTC">"ETH-BTC"</option>
+            <option value="ATOM-BTC">ATOM-BTC</option>
+            <option value="DOGE-GBP">DOGE-GBP</option>
+        </select>
+    </p>
+    <div id="chart">
+    </div>
+    <div id="chart2">
 
+    </div>
     {% block script %}
         <script src="{% static 'markets/index.js' %}"></script>
     {% endblock %}
