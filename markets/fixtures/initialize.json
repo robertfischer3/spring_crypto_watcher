@@ -1,0 +1,30 @@
+[
+  {
+    "model": "markets.Product",
+    "fields": {
+      "title": "ETH-USD",
+      "exchange_id": "ETH-USD"
+    }
+  },
+  {
+    "model": "markets.Product",
+    "fields": {
+      "title": "ETH-BTC",
+      "exchange_id": "ETH-BTC"
+    }
+  },
+  {
+    "model": "markets.Product",
+    "fields": {
+      "title": "ATOM-BTC",
+      "exchange_id": "ATOM-BTC"
+    }
+  },
+  {
+    "model": "markets.Product",
+    "fields": {
+      "title": "DOGE-GBP",
+      "exchange_id": "DOGE-GBP"
+    }
+  }
+]

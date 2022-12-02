@@ -1,3 +1,5 @@
+import hmac
+import os
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404, HttpResponseNotFound, HttpResponse
@@ -9,15 +11,38 @@ from django.contrib import messages
 from django.db import IntegrityError
 from markets.models import User
 from django.views import View
-
+import requests
+from datetime import datetime, timedelta, time
+import json, hmac, hashlib, time, requests, base64
+import pandas as pd
+import json
 
 class Index(View):
     def get(self, request):
+
+        api_url = "https://api.exchange.coinbase.com"
+        sym = "BTC-USD"
+        barsize = "300"
+        timeEnd = datetime.now()
+        delta = timedelta(minutes=5)
+        timeStart = timeEnd - (300*delta)
+
+        timeStart = timeStart.isoformat()
+        timeEnd = timeEnd.isoformat()
+
+        parameters={"start": timeStart, "end": timeEnd, "granularity":barsize}
+
+        data = requests.get(f"{api_url}/products/{sym}/candles",
+                            params=parameters,
+                            headers={"content-type":"application/json"})
+
         context = {
-            'count': 'Hello World'
+            'results': data.json()
         }
         return render(request, 'markets/index.html', context)
 
+    def post(self, request):
+        pass
 
 class Analytics(View):
     def get(self, request):

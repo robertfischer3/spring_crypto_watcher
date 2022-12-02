@@ -14,7 +14,11 @@
     <div id="chart2">
 
     </div>
+    <table>
+
+    </table>
     {% block script %}
+        {{ results|json_script:"results" }}
         <script src="{% static 'markets/index.js' %}"></script>
     {% endblock %}
 {% endblock %}
