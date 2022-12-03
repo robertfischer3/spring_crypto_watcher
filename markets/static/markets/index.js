@@ -127,7 +127,10 @@ function openWebSocket() {
         askOrders.sort((a, b) => b.b - a.b);
 
         if (bidOrders.length > 15){
-            bidOrders.shift();
+            askOrders.shift();
+        }
+          if (bidOrders.length > 15){
+            askOrders.shift();
         }
 
     });
