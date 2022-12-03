@@ -2,7 +2,7 @@
 {% load static %}
 {% block body %}
     <p> Select a exchange to track:
-        <select id="select_cryptocurrency_01">
+        <select id="select_cryptocurrency_01" onchange="onChangeCurrency()">
             <option value="ETH-USD">ETH-USD</option>
             <option value="ETH-BTC">"ETH-BTC"</option>
             <option value="ATOM-BTC">ATOM-BTC</option>
@@ -11,14 +11,28 @@
     </p>
     <div id="chart">
     </div>
-    <div id="chart2">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="table-responsive">
+                    <table class="table table-hover" id="Ticker24hr_01">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Key</th>
+                            <th scope="col">Value</th>
+                        </tr>
+                        </thead>
+                        <tbody id="table_body_01">
 
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-    <table>
-
-    </table>
     {% block script %}
         {{ results|json_script:"results" }}
+        {{ ticker|json_script:"ticker" }}
         <script src="{% static 'markets/index.js' %}"></script>
     {% endblock %}
 {% endblock %}

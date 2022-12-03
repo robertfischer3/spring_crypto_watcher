@@ -17,28 +17,22 @@ import json, hmac, hashlib, time, requests, base64
 import pandas as pd
 import json
 
+BINANCE_URL = 'https://api.binance.us'
+url_stuff = 'https://api.binance.us/api/v3/klines?symbol=ETHUSD&interval=1m'
+BINANCE_EXCH_INFO_URL = "https://api.binance.us/api/v3/exchangeInfo"
+
 class Index(View):
     def get(self, request):
+        symbol = "BTCUSD"
+        candle_data = requests.get(f"{BINANCE_URL}/api/v3/klines?symbol={symbol}&interval=1m")
 
-        api_url = "https://api.exchange.coinbase.com"
-        sym = "BTC-USD"
-        barsize = "300"
-        timeEnd = datetime.now()
-        delta = timedelta(minutes=5)
-        timeStart = timeEnd - (300*delta)
-
-        timeStart = timeStart.isoformat()
-        timeEnd = timeEnd.isoformat()
-
-        parameters={"start": timeStart, "end": timeEnd, "granularity":barsize}
-
-        data = requests.get(f"{api_url}/products/{sym}/candles",
-                            params=parameters,
-                            headers={"content-type":"application/json"})
+        ticker = requests.get(f"{BINANCE_URL}/api/v3/ticker/24hr?symbol={symbol}")
 
         context = {
-            'results': data.json()
+            'results': candle_data.json(),
+            'ticker': ticker.json()
         }
+
         return render(request, 'markets/index.html', context)
 
     def post(self, request):
