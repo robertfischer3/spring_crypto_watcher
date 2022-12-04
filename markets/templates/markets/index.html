@@ -1,14 +1,22 @@
 {% extends "markets/layout.html" %}
 {% load static %}
 {% block body %}
-    <p> Select a exchange to track:
-        <select id="select_cryptocurrency_01" onchange="onChangeCurrency()">
-            <option value="ETH-USD">ETH-USD</option>
-            <option value="ETH-BTC">"ETH-BTC"</option>
-            <option value="ATOM-BTC">ATOM-BTC</option>
-            <option value="DOGE-GBP">DOGE-GBP</option>
-        </select>
-    </p>
+    <div class="row">
+        <div class="col">
+            <p> Select a exchange to track:
+                <select id="select_cryptocurrency_01" onchange="onChangeCurrency()">
+                    <option value="ETH-USD">ETH-USD</option>
+                    <option value="ETH-BTC">"ETH-BTC"</option>
+                    <option value="ATOM-BTC">ATOM-BTC</option>
+                    <option value="DOGE-GBP">DOGE-GBP</option>
+                </select>
+            </p>
+        </div>
+        <div class="col">
+            <div id="current_variance">Current Variance (calculating...)</div>
+        </div>
+    </div>
+
     <div id="chart">
     </div>
     <div class="container">
@@ -29,18 +37,37 @@
                 </div>
             </div>
             <div class="col">
-                <table class="table table-hover" id="ask_table_01">
+                <h2>Order Book Data</h2>
+                <div>
+                    <div id="current_ask_01"></div>
+                    <table class="table table-hover" id="ask_table_01">
                         <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Key</th>
-                            <th scope="col">Value</th>
+                            <th scope="col">Product</th>
+                            <th scope="col">Ask</th>
+                            <th scope="col">Volume</th>
                         </tr>
                         </thead>
-                        <tbody id="table_body_02">
+                        <tbody id="ask_table_body_01">
 
                         </tbody>
                     </table>
+                </div>
+                <div>
+                    <div id="current_bid_01"></div>
+                    <table class="table table-hover" id="bid_table_01">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Bid</th>
+                            <th scope="col">Volume</th>
+                        </tr>
+                        </thead>
+                        <tbody id="bid_table_body_01">
 
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

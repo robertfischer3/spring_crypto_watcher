@@ -23,7 +23,7 @@ BINANCE_EXCH_INFO_URL = "https://api.binance.us/api/v3/exchangeInfo"
 
 class Index(View):
     def get(self, request):
-        symbol = "BTCUSD"
+        symbol = "ETHUSD"
         candle_data = requests.get(f"{BINANCE_URL}/api/v3/klines?symbol={symbol}&interval=1m")
 
         ticker = requests.get(f"{BINANCE_URL}/api/v3/ticker/24hr?symbol={symbol}")

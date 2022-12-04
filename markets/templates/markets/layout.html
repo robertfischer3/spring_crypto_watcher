@@ -11,12 +11,42 @@
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <link href="{% static 'markets/styles.css' %}" rel="stylesheet">
-
+    <style>
+        @keyframes fadebid {
+            0% {
+                background-color: red;
+            }
+            100% {
+                background-color: transparent;
+            }
+        }
+         @keyframes fadeask {
+            0% {
+                background-color: lightgreen;
+            }
+            100% {
+                background-color: transparent;
+            }
+        }
+        .new_row_fade_01 {
+            background-color: red;
+            animation-name: fadebid;
+            animation-fill-mode: forwards;
+            animation-duration: 1s;
+            animation-delay: 0s;
+        }
+        .new_row_fade_02 {
+            background-color: lightgreen;
+            animation-name: fadeask;
+            animation-fill-mode: forwards;
+            animation-duration: 1s;
+            animation-delay: 0s;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="#">Spring Crypto Watcher</a>
-
     <div>
         <ul class="navbar-nav mr-auto">
 
@@ -31,7 +61,7 @@
         </ul>
     </div>
 </nav>
-
+<h1>Bob's crypto world</h1>
 <div class="body">
     {% block body %}
     {% endblock %}
