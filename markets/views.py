@@ -45,7 +45,27 @@ class Analytics(View):
         }
         return render(request, 'markets/analytics.html', context)
 
+def get_products_sublist(request):
+    """
+    This method pulls back the sub-list of products that the application supports
+    and passing them onto the client. While this code could be pulled directly
+    by JavaScript, the points to demonstrate addition backend capabilities where heavy
+    processing might better occur on the server side.
+    :param request:
+    :return:
+    """
+    if request.method == "GET":
+        exhang_info = requests.get(f"{BINANCE_URL}/api/v3/exchangeInfo")
 
+        symbol_dict = {}
+
+        exchange_content = json.loads(exhang_info.content)
+        symbols = exchange_content.get('symbols')
+        # Here we are only interested in a subset of products
+        for symbol in symbols[0:10]:
+            symbol_code = symbol.get('symbol')
+            symbol_dict[symbol_code] = symbol_code
+        return JsonResponse(symbol_dict)
 def login_view(request):
     if request.method == "POST":
 

@@ -4,7 +4,7 @@
     <div class="row">
         <div class="col">
             <p> Select a exchange to track:
-                <select id="select_cryptocurrency_01" onchange="onChangeCurrency()">
+                <select id="select_cryptocurrency_01" >
                     <option value="ETH-USD">ETH-USD</option>
                     <option value="ETH-BTC">"ETH-BTC"</option>
                     <option value="ATOM-BTC">ATOM-BTC</option>
@@ -13,7 +13,11 @@
             </p>
         </div>
         <div class="col">
-            <div id="current_variance">Current Variance (calculating...)</div>
+            <strong>
+            <div id="recent_average">Mean: (calculating...)</div>
+            <div id="current_variance">Variance: (calculating...)</div>
+            <div id="current_standard_deviation">Standard Deviation: (calculating...)</div>
+            </strong>
         </div>
     </div>
 

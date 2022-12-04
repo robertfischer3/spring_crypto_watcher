@@ -13,7 +13,6 @@ messageNumber = 0;
 
 WEBSOCKET_URL = 'wss://stream.binance.us:9443/ws';
 
-
 document.addEventListener('DOMContentLoaded', function () {
 
     const results = document.querySelector('#results').textContent;
@@ -43,20 +42,24 @@ document.addEventListener('DOMContentLoaded', function () {
         records.push(j);
     });
 
-    statsArr = [];
-    records.forEach((entry, index) => {
-        statsArr.push(entry.y[0]);
-    })
-    let variance = findVariance(statsArr);
-    varianceDiv = document.querySelector('#current_variance');
-    varianceDiv.innerHTML = variance;
+    //Update current data statics
+    updateStatistics(records);
 
+    // Creating the initial chart configuration
     options = configureChart(line, records);
 
+    // Creating a new chart and rendering it
     chart = new ApexCharts(document.querySelector("#chart"), options);
     chart.render();
 
+    //Here we are binding the currency selector to an event
     const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
+    if (exchangeSelector){
+        exchangeSelector.onchange = function() {
+            const symbolSelector = document.querySelector("#select_cryptocurrency_01");
+            onChangeCurrency(symbolSelector.value);
+        }
+    }
 
     socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
     socket.onopen = openWebSocket;
@@ -76,6 +79,7 @@ function openWebSocket() {
         currentBid = document.querySelector('#current_bid_01');
 
         const message = JSON.parse(event.data);
+
         if (message.e === 'kline') {
 
             let updateRecord = [];
@@ -98,14 +102,8 @@ function openWebSocket() {
             records.push(j);
             records.shift();
 
-            statsArr = [];
-            records.forEach((entry, index) => {
-                statsArr.push(entry.y[0]);
-            })
-            let variance = findVariance(statsArr);
-            varianceDiv = document.querySelector('#current_variance')
-            varianceDiv.innerHTML = `Current Variance ${variance}`
-            let average = statsArr.reduce((a, b) => a + b, 0) / statsArr.length;
+            updateStatistics(records);
+
             let chartDiv = document.querySelector("#chart");
 
             if (chartDiv) {
@@ -128,6 +126,38 @@ function openWebSocket() {
             processOrderBook(message);
         }
     });
+
+}
+
+function updateStatistics(records) {
+
+    //This method calculates statistic to the array of values on the screen.
+    statsArr = [];
+
+    records.forEach((entry, index) => {
+        statsArr.push(parseFloat(entry.y[0]));
+    })
+    let variance = findVariance(statsArr);
+    //Finding the average of the array
+    let average = statsArr.reduce((a, b) => a + b, 0) / statsArr.length;
+    //Finding the standard deviation
+    const standardDeviation = (arr, usePopulation = false) => {
+        return Math.sqrt(
+            arr.reduce((acc, val) => acc.concat((val - average) ** 2), []).reduce((acc, val) => acc + val, 0) /
+            (arr.length - (usePopulation ? 0 : 1))
+        );
+    };
+    let standardDev = standardDeviation(statsArr, true);
+
+    averageDiv = document.querySelector('#recent_average');
+    averageDiv.innerHTML = `Mean ${average.toFixed(3)}`;
+
+    varianceDiv = document.querySelector('#current_variance')
+    varianceDiv.innerHTML = `Variance ${variance.toFixed(3)}`
+
+    standardDeviationDiv = document.querySelector('#current_standard_deviation');
+    standardDeviationDiv.innerHTML = `Standard Deviation ${standardDev.toFixed(3)}`;
+
 
 }
 
@@ -266,9 +296,10 @@ function unsubscribeWebSocket(symbol, interval = '1m') {
     });
 }
 
-function onChangeCurrency(symbol) {
+function onChangeCurrency(symbolSelected) {
+    alert(symbolSelected)
     if (socket.readyState === 1) {
-        unsubscribeWebSocket(symbol);
+        //unsubscribeWebSocket(symbol);
     }
 
 }
@@ -349,25 +380,7 @@ function configureChart(line, chart) {
     return options;
 }
 
-const jsonText = `{
-            "type": "subscribe",
-            "product_ids": [
-                "ETH-USD",
-                "ETH-EUR"
-            ],
-            "channels": [
-                "level2",
-                "heartbeat",
-                {
-                    "name": "ticker",
-                    "product_ids": [
-                        "ETH-BTC",
-                        "ETH-USD"
-                    ]
-                }
-            ]
-        }`;
-socket.send(jsonText);
+
 
 
 
