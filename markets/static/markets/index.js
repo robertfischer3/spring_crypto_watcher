@@ -21,8 +21,45 @@ document.addEventListener('DOMContentLoaded', function () {
     const jsonObjects = JSON.parse(results);
     const jsonTicker = JSON.parse(ticker);
 
+    const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
+    if (exchangeSelector) {
+        loadSelect(exchangeSelector);
+        exchangeSelector.onchange = function () {
+            const symbolSelector = document.querySelector("#select_cryptocurrency_01");
+            onChangeCurrency(symbolSelector.value);
+        }
+    }
+
     populateTable(jsonTicker);
 
+    // We load the charts with initial data
+    loadCandleChartData(jsonObjects, records);
+
+    //Update current data statics
+    updateStatistics(records);
+
+    // Creating the initial chart configuration
+    options = configureChart(line, records);
+
+    // Creating a new chart and rendering it
+    chart = new ApexCharts(document.querySelector("#chart"), options);
+    chart.render();
+
+    //Here we are binding the currency selector to an event
+
+
+    socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
+    socket.onopen = openWebSocket;
+
+
+});
+
+function loadCandleChartData(jsonObjects, records) {
+    //Since we are loading the chart with new data, we
+    // have to clear out any existing records
+    if (records) {
+        records.length = 0;
+    }
     jsonObjects.forEach((entry, index) => {
         let record = [];
         if (index % 50 === 0) {
@@ -41,38 +78,17 @@ document.addEventListener('DOMContentLoaded', function () {
         let j = {x: (new Date(entry[0])), y: record};
         records.push(j);
     });
-
-    //Update current data statics
-    updateStatistics(records);
-
-    // Creating the initial chart configuration
-    options = configureChart(line, records);
-
-    // Creating a new chart and rendering it
-    chart = new ApexCharts(document.querySelector("#chart"), options);
-    chart.render();
-
-    //Here we are binding the currency selector to an event
-    const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
-    if (exchangeSelector){
-        loadSelect(exchangeSelector);
-        exchangeSelector.onchange = function() {
-            const symbolSelector = document.querySelector("#select_cryptocurrency_01");
-            onChangeCurrency(symbolSelector.value);
-        }
-    }
-
-    socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
-    socket.onopen = openWebSocket;
-
-
-});
+}
 
 function openWebSocket() {
-
+    // This function is called when a websocket connection is
+    // opened
+    // Here we are subscribing to sever messages on the open
+    // web socket
     const subscribe = subscribeToWebSocket(symbol);
     socket.send(subscribe);
-
+    // Here we listen for incoming messages
+    // from the websocket and process them
     socket.addEventListener('message', (event) => {
 
         console.log('Message from server ', event.data);
@@ -81,6 +97,9 @@ function openWebSocket() {
 
         const message = JSON.parse(event.data);
 
+        // Kline messages come in a slow rate
+        // so we can update the chart when the message
+        // arrives without a performance hit
         if (message.e === 'kline') {
 
             let updateRecord = [];
@@ -117,40 +136,56 @@ function openWebSocket() {
                     type: 'candlestick',
                     data: records
                 }]);
-
-
             }
 
         }
+        // if the message meets the format for an order
+        // book message, then we update the order book
+        // information
         if (message.u !== undefined) {
-
             processOrderBook(message);
         }
     });
 
 }
-function loadSelect(selectObj){
-     fetch(`products`)
+
+function loadSelect(selectObj) {
+    // This function loads the select control with product data
+    // received from a call to the Django backend
+    fetch(`products`)
         .then(response => {
             if (response.ok) {
                 return response.json()
             }
             return Promise.reject(response);
         })
-         .then(products => {
-                 //add products to drop down
-                 console.log(products);
-                 //reset the drop list given we have a server response
-                 selectObj.innerHTML ="";
+        .then(products => {
+            //add products to drop down
+            console.log(products);
+            //reset the drop list given we have a server response
+            selectObj.innerHTML = "";
 
-                 for (let key in products) {
-                     let option = document.createElement('option');
-                     option.setAttribute('value', products[key]);
-                     option.innerHTML = key;
-                     selectObj.append(option);
-                 }
+            for (let key in products) {
+                let option = document.createElement('option');
+                option.setAttribute('value', products[key]);
+                option.innerHTML = key;
+                selectObj.append(option);
+            }
 
-             });
+        });
+}
+
+function onChangeCurrency(symbolSelected) {
+    console.log(`Currency value changed to ${symbolSelected}`)
+    if (socket.readyState === 1) {
+        unsubscribeWebSocket(symbol);
+        // Set symbol at the global level
+        symbol = symbolSelected;
+        socket.close();
+        socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
+        socket.onopen = openWebSocket;
+    }
+
 }
 
 function updateStatistics(records) {
@@ -310,7 +345,6 @@ function renderAskOrderRow(askOrders) {
     });
 }
 
-
 function unsubscribeWebSocket(symbol, interval = '1m') {
     return JSON.stringify({
         "method": "UNSUBSCRIBE",
@@ -325,18 +359,7 @@ function unsubscribeWebSocket(symbol, interval = '1m') {
     });
 }
 
-function onChangeCurrency(symbolSelected) {
-    console.log(`Currency value changed to ${symbolSelected}`)
-    if (socket.readyState === 1) {
-        unsubscribeWebSocket(symbol);
-        // Set symbol at the global level
-        symbol = symbolSelected;
-        socket.close();
-        socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
-        socket.onopen = openWebSocket;
-    }
 
-}
 
 function subscribeToWebSocket(symbol, interval = '1m') {
     return JSON.stringify(// Request
