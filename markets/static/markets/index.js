@@ -1,7 +1,7 @@
 let socket = undefined;
 
 let data = [0];
-let symbol = "ETHUSD";
+let symbol = "BTCUSD";
 let askOrders = [];
 let bidOrders = [];
 let chart = undefined;
@@ -21,15 +21,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const jsonObjects = JSON.parse(results);
     const jsonTicker = JSON.parse(ticker);
 
-    const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
-    if (exchangeSelector) {
-        loadSelect(exchangeSelector);
-        exchangeSelector.onchange = function () {
-            const symbolSelector = document.querySelector("#select_cryptocurrency_01");
-            onChangeCurrency(symbolSelector.value);
-        }
-    }
-
     populateTable(jsonTicker);
 
     // We load the charts with initial data
@@ -45,11 +36,21 @@ document.addEventListener('DOMContentLoaded', function () {
     chart = new ApexCharts(document.querySelector("#chart"), options);
     chart.render();
 
-    //Here we are binding the currency selector to an event
-
-
-    socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
-    socket.onopen = openWebSocket;
+    const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
+    if (exchangeSelector) {
+        //This method call load the select dropdown
+        loadSelect(exchangeSelector);
+        exchangeSelector.onchange = function () {
+            const symbolSelector = document.querySelector("#select_cryptocurrency_01");
+            symbolSelector.value = symbol;
+            // This call initiates a connection to a websocket
+            onChangeCurrency(symbolSelector.value);
+        }
+        if (socket === undefined) {
+            socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
+            socket.onopen = openWebSocket;
+        }
+    }
 
 
 });
@@ -149,6 +150,26 @@ function openWebSocket() {
 
 }
 
+function getCandleRecords(symbol) {
+
+    let candle_records = undefined;
+
+    fetch(`candle/$(symbol)`)
+        .then(response => {
+            if (response.ok) {
+                return response.json()
+            }
+            return Promise.reject(response);
+        })
+        .then(candles => {
+
+            console.log(candles);
+            candle_records = candles;
+        });
+
+    return candle_records;
+}
+
 function loadSelect(selectObj) {
     // This function loads the select control with product data
     // received from a call to the Django backend
@@ -177,15 +198,20 @@ function loadSelect(selectObj) {
 
 function onChangeCurrency(symbolSelected) {
     console.log(`Currency value changed to ${symbolSelected}`)
+
     if (socket.readyState === 1) {
         unsubscribeWebSocket(symbol);
         // Set symbol at the global level
         symbol = symbolSelected;
         socket.close();
-        socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
-        socket.onopen = openWebSocket;
-    }
 
+    }
+    jsonObjects = getCandleRecords(symbolSelected);
+    // We load the charts with initial data
+    loadCandleChartData(jsonObjects, records);
+
+    socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
+    //Update current data statics socket.onopen = openWebSocket;
 }
 
 function updateStatistics(records) {
@@ -358,7 +384,6 @@ function unsubscribeWebSocket(symbol, interval = '1m') {
         "id": 1
     });
 }
-
 
 
 function subscribeToWebSocket(symbol, interval = '1m') {

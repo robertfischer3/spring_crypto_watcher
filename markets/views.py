@@ -60,7 +60,10 @@ def get_initial_chart_data(request, symbol):
 
 
 def get_candle_data(url, symbol, interval="1m"):
-    #General function to pull candle information from Binance
+    # General function to pull candle information from Binance
+    # This funcution could also been done on the client side with Javascript
+    # However, addition statistical data modeling can process the data with
+    # Python data science libraries which may be included in the future
     candle_data = requests.get(f"{url}/api/v3/klines?symbol={symbol}&interval={interval}")
 
     return candle_data
