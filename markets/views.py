@@ -21,11 +21,11 @@ BINANCE_URL = 'https://api.binance.us'
 url_stuff = 'https://api.binance.us/api/v3/klines?symbol=ETHUSD&interval=1m'
 BINANCE_EXCH_INFO_URL = "https://api.binance.us/api/v3/exchangeInfo"
 
+
 class Index(View):
     def get(self, request):
         symbol = "ETHUSD"
-        candle_data = requests.get(f"{BINANCE_URL}/api/v3/klines?symbol={symbol}&interval=1m")
-
+        candle_data = get_candle_data(BINANCE_URL, symbol=symbol, interval="1m")
         ticker = requests.get(f"{BINANCE_URL}/api/v3/ticker/24hr?symbol={symbol}")
 
         context = {
@@ -38,12 +38,33 @@ class Index(View):
     def post(self, request):
         pass
 
+
 class Analytics(View):
     def get(self, request):
         context = {
             'count': 'Hello Analytics'
         }
         return render(request, 'markets/analytics.html', context)
+
+
+def get_initial_chart_data(request, symbol):
+    """
+    Grabbing updated initial chart data to update a chart to new symbol
+    :param request:
+    :param symbol:
+    :return:
+    """
+    if request.method == "GET":
+        candle_data = get_candle_data(BINANCE_URL, symbol=symbol, interval="1m")
+        return JsonResponse(candle_data.json());
+
+
+def get_candle_data(url, symbol, interval="1m"):
+    #General function to pull candle information from Binance
+    candle_data = requests.get(f"{url}/api/v3/klines?symbol={symbol}&interval={interval}")
+
+    return candle_data
+
 
 def get_products_sublist(request):
     """
@@ -65,7 +86,10 @@ def get_products_sublist(request):
         for symbol in symbols[0:10]:
             symbol_code = symbol.get('symbol')
             symbol_dict[symbol_code] = symbol_code
+
         return JsonResponse(symbol_dict)
+
+
 def login_view(request):
     if request.method == "POST":
 

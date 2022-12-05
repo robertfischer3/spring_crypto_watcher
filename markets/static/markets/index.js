@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
     //Here we are binding the currency selector to an event
     const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
     if (exchangeSelector){
+        loadSelect(exchangeSelector);
         exchangeSelector.onchange = function() {
             const symbolSelector = document.querySelector("#select_cryptocurrency_01");
             onChangeCurrency(symbolSelector.value);
@@ -128,13 +129,36 @@ function openWebSocket() {
     });
 
 }
+function loadSelect(selectObj){
+     fetch(`products`)
+        .then(response => {
+            if (response.ok) {
+                return response.json()
+            }
+            return Promise.reject(response);
+        })
+         .then(products => {
+                 //add products to drop down
+                 console.log(products);
+                 //reset the drop list given we have a server response
+                 selectObj.innerHTML ="";
+
+                 for (let key in products) {
+                     let option = document.createElement('option');
+                     option.setAttribute('value', products[key]);
+                     option.innerHTML = key;
+                     selectObj.append(option);
+                 }
+
+             });
+}
 
 function updateStatistics(records) {
 
     //This method calculates statistic to the array of values on the screen.
     statsArr = [];
 
-    records.forEach((entry, index) => {
+    records.forEach((entry) => {
         statsArr.push(parseFloat(entry.y[0]));
     })
     let variance = findVariance(statsArr);
@@ -162,6 +186,7 @@ function updateStatistics(records) {
 }
 
 function processOrderBook(orderBookRow) {
+    // This function processes the order book row for both bid and ask values
     let tempRowBid = {s: orderBookRow.s, b: parseFloat(orderBookRow.b), B: parseFloat(orderBookRow.B)};
     if (tempRowBid.s !== undefined) {
         currentBid.innerHTML = `Current Bid <strong>${orderBookRow.b}, ${orderBookRow.B} </strong>`;
@@ -197,15 +222,19 @@ function processOrderBook(orderBookRow) {
     renderBidOrderRow(bidOrders);
 }
 
-const findVariance = (arr = []) => {
-    if (!arr.length) {
+const findVariance = (recordsArray = []) => {
+
+    // This function calculates the variance found in the chart
+    // data
+    if (!recordsArray.length) {
         return 0;
     }
-    const sum = arr.reduce((acc, val) => acc + val);
-    const {length: num} = arr;
+    // Sum all the values in the array
+    const sum = recordsArray.reduce((acc, val) => acc + val);
+    const {length: num} = recordsArray;
     const median = sum / num;
     let variance = 0;
-    arr.forEach(num => {
+    recordsArray.forEach(num => {
         variance += ((num - median) * (num - median));
     });
     variance /= num;
@@ -297,9 +326,14 @@ function unsubscribeWebSocket(symbol, interval = '1m') {
 }
 
 function onChangeCurrency(symbolSelected) {
-    alert(symbolSelected)
+    console.log(`Currency value changed to ${symbolSelected}`)
     if (socket.readyState === 1) {
-        //unsubscribeWebSocket(symbol);
+        unsubscribeWebSocket(symbol);
+        // Set symbol at the global level
+        symbol = symbolSelected;
+        socket.close();
+        socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
+        socket.onopen = openWebSocket;
     }
 
 }
