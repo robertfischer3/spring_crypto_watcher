@@ -1,19 +1,17 @@
 
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404, HttpResponseNotFound, HttpResponse
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.contrib import messages
 from django.db import IntegrityError
 from markets.models import User
 from django.views import View
-import requests
-from datetime import datetime, timedelta, time
+from django.views.decorators.csrf import csrf_exempt
+from .models import Candle, Product
+
 import json, hmac, hashlib, time, requests, base64
-import pandas as pd
+
 import json
 
 BINANCE_URL = 'https://api.binance.us'
@@ -57,7 +55,17 @@ def get_initial_chart_data(request, symbol):
         candle_data = get_candle_data(BINANCE_URL, symbol=symbol, interval="1m")
         candle_dict = {"candles": candle_data.json()}
         return JsonResponse(candle_dict)
+@csrf_exempt
+def addOrder(request):
 
+    # Composing a new email must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Check recipient emails
+    data = json.loads(request.body)
+    Product.title = data['content']['s']
+    Candle()
 
 def get_candle_data(url, symbol, interval="1m"):
     # General function to pull candle information from Binance

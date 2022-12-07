@@ -107,7 +107,7 @@ function openWebSocket() {
         // so we can update the chart when the message
         // arrives without a performance hit
         if (message.e === 'kline') {
-
+            recordOrder(message);
             let updateRecord = [];
             if (records.length % 50 === 0) {
                 console.log(records.length % 50);
@@ -174,7 +174,29 @@ function getCandleRecords(symbol) {
             loadCandleChartData(candle_records, records, line);
         });
 }
+function recordOrder(order){
+      /*
+    This method records the incoming order message to save for later analysis
+     */
 
+    fetch(`/addorder`, {
+        method: 'POST',
+        body: JSON.stringify({
+            content: order
+        })
+    })
+        .then((response) => {
+            // 1. check response.ok
+            if (response.ok) {
+                return response.json();
+            }
+            // 2. reject instead of throw
+            return Promise.reject(response);
+        })
+        .catch((response) => {
+
+        });
+}
 function loadSelect(selectObj) {
     // This function loads the select control with product data
     // received from a call to the Django backend
