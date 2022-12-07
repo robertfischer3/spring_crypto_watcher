@@ -1,5 +1,4 @@
-import hmac
-import os
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, Http404, HttpResponseNotFound, HttpResponse
@@ -24,7 +23,7 @@ BINANCE_EXCH_INFO_URL = "https://api.binance.us/api/v3/exchangeInfo"
 
 class Index(View):
     def get(self, request):
-        symbol = "ETHUSD"
+        symbol = "BTCUSD"
         candle_data = get_candle_data(BINANCE_URL, symbol=symbol, interval="1m")
         ticker = requests.get(f"{BINANCE_URL}/api/v3/ticker/24hr?symbol={symbol}")
 
@@ -56,7 +55,8 @@ def get_initial_chart_data(request, symbol):
     """
     if request.method == "GET":
         candle_data = get_candle_data(BINANCE_URL, symbol=symbol, interval="1m")
-        return JsonResponse(candle_data.json());
+        candle_dict = {"candles": candle_data.json()}
+        return JsonResponse(candle_dict)
 
 
 def get_candle_data(url, symbol, interval="1m"):

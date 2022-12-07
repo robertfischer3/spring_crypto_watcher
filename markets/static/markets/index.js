@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
     populateTable(jsonTicker);
 
     // We load the charts with initial data
-    loadCandleChartData(jsonObjects, records);
+    loadCandleChartData(jsonObjects, records, line);
 
     //Update current data statics
     updateStatistics(records);
@@ -36,13 +36,13 @@ document.addEventListener('DOMContentLoaded', function () {
     chart = new ApexCharts(document.querySelector("#chart"), options);
     chart.render();
 
-    const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
+ const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
     if (exchangeSelector) {
         //This method call load the select dropdown
         loadSelect(exchangeSelector);
         exchangeSelector.onchange = function () {
             const symbolSelector = document.querySelector("#select_cryptocurrency_01");
-            symbolSelector.value = symbol;
+            // symbolSelector.value = symbol;
             // This call initiates a connection to a websocket
             onChangeCurrency(symbolSelector.value);
         }
@@ -55,13 +55,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-function loadCandleChartData(jsonObjects, records) {
+function loadCandleChartData(jsonObjects, records, line) {
     //Since we are loading the chart with new data, we
     // have to clear out any existing records
     if (records) {
         records.length = 0;
     }
+    if (line){
+        line.length = 0;
+    }
     jsonObjects.forEach((entry, index) => {
+        console.log(entry);
         let record = [];
         if (index % 50 === 0) {
             console.log(index % 50);
@@ -78,7 +82,8 @@ function loadCandleChartData(jsonObjects, records) {
 
         let j = {x: (new Date(entry[0])), y: record};
         records.push(j);
-    });
+
+});
 }
 
 function openWebSocket() {
@@ -153,21 +158,21 @@ function openWebSocket() {
 function getCandleRecords(symbol) {
 
     let candle_records = undefined;
+    console.log(`candle/${symbol}`);
 
-    fetch(`candle/$(symbol)`)
+    fetch(`candle/${symbol}`)
         .then(response => {
             if (response.ok) {
                 return response.json()
             }
             return Promise.reject(response);
         })
-        .then(candles => {
+        .then(entry => {
 
-            console.log(candles);
-            candle_records = candles;
+            console.log(entry);
+            candle_records = entry.candles;
+            loadCandleChartData(candle_records, records, line);
         });
-
-    return candle_records;
 }
 
 function loadSelect(selectObj) {
@@ -206,12 +211,14 @@ function onChangeCurrency(symbolSelected) {
         socket.close();
 
     }
-    jsonObjects = getCandleRecords(symbolSelected);
-    // We load the charts with initial data
-    loadCandleChartData(jsonObjects, records);
 
+    getCandleRecords(symbolSelected);
+    // We load the charts with initial data
+    //loadCandleChartData(jsonObjects, records, line);
+    symbol = symbolSelected
     socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
-    //Update current data statics socket.onopen = openWebSocket;
+    //Update current data statics
+    socket.onopen = openWebSocket;
 }
 
 function updateStatistics(records) {
