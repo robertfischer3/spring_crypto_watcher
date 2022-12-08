@@ -51,6 +51,10 @@ document.addEventListener('DOMContentLoaded', function () {
             socket.onopen = openWebSocket;
         }
     }
+    checkBox = document.querySelector('#save_candle_data');
+    if (checkBox){
+        checkBox.addEventListener('click', createBatchId);
+    }
 
 
 });
@@ -107,7 +111,13 @@ function openWebSocket() {
         // so we can update the chart when the message
         // arrives without a performance hit
         if (message.e === 'kline') {
-            recordOrder(message);
+            //Here we provide a mechanism to save Candle Chart History for backtesting.
+            checkBox = document.querySelector('#save_candle_data');
+            if (checkBox && checkBox.checked) {
+                batch_id = document.querySelector('#report_transaction_id_01');
+                message.batch_id = batch_id.innerHTML;
+                recordOrder(message);
+            }
             let updateRecord = [];
             if (records.length % 50 === 0) {
                 console.log(records.length % 50);
@@ -143,7 +153,10 @@ function openWebSocket() {
                     data: records
                 }]);
             }
-
+            candle_data_lake = document.querySelector('#save_candle_data')
+            if (candle_data_lake){
+                check_value = candle_data_lake.value
+            }
         }
         // if the message meets the format for an order
         // book message, then we update the order book
@@ -155,6 +168,23 @@ function openWebSocket() {
 
 }
 
+function createBatchId(){
+    //This method creates a batch id for grouping records together for analysis
+    checkBox = document.querySelector('#save_candle_data');
+    if (checkBox && checkBox.checked){
+        let uuid = crypto.randomUUID();
+        batch_div = document.querySelector('#report_transaction_id_01');
+        batch_div.innerHTML = uuid;
+        batchMsg = document.querySelector('#batch_message_01');
+        batchMsg.innerHTML = "Batch Record Group ID";
+    }
+    else if (checkBox){
+        batchMsg = document.querySelector('#batch_message_01');
+        batchMsg.innerHTML = "";
+        batch_div = document.querySelector('#report_transaction_id_01');
+        batch_div.innerHTML = "";
+    }
+}
 function getCandleRecords(symbol) {
 
     let candle_records = undefined;

@@ -20,7 +20,8 @@
                 background-color: transparent;
             }
         }
-         @keyframes fadeask {
+
+        @keyframes fadeask {
             0% {
                 background-color: lightgreen;
             }
@@ -28,6 +29,7 @@
                 background-color: transparent;
             }
         }
+
         .new_row_fade_01 {
             background-color: red;
             animation-name: fadebid;
@@ -35,6 +37,7 @@
             animation-duration: 1s;
             animation-delay: 0s;
         }
+
         .new_row_fade_02 {
             background-color: lightgreen;
             animation-name: fadeask;
@@ -49,19 +52,32 @@
     <a class="navbar-brand" href="#">Spring Crypto Watcher</a>
     <div>
         <ul class="navbar-nav mr-auto">
-
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'markets:index' %}"><strong>Home</strong></a>
             </li>
-
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'markets:analytics' %}">Analytics</a>
             </li>
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><strong>User {{ user.username }}</strong></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'markets:logout' %}">Log Out</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'markets:login' %}">Log In</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'markets:register' %}">Register</a>
+                </li>
+            {% endif %}
 
         </ul>
     </div>
 </nav>
-<h1>Bob's crypto world</h1>
+<h2>Crypto Market</h2>
 <div class="body">
     {% block body %}
     {% endblock %}

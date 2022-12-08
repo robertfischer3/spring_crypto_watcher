@@ -6,9 +6,6 @@
             <p> Select a exchange to track:
                 <select id="select_cryptocurrency_01" >
                     <option value="ETH-USD">ETH-USD</option>
-                    <option value="ETH-BTC">"ETH-BTC"</option>
-                    <option value="ATOM-BTC">ATOM-BTC</option>
-                    <option value="DOGE-GBP">DOGE-GBP</option>
                 </select>
             </p>
         </div>
@@ -17,8 +14,18 @@
             <div id="recent_average">Mean: (calculating...)</div>
             <div id="current_variance">Variance: (calculating...)</div>
             <div id="current_standard_deviation">Standard Deviation: (calculating...)</div>
+                {% if user.is_authenticated %}
+                    <div>
+                      <input type="checkbox" id="save_candle_data" name="candle_save" value="candle_save">
+                      <label for="candle_save">Save Candle Feed to Data Lake</label>
+                    </div>
+                    <div id="batch_message_01"></div>
+                    <div id="report_transaction_id_01">
+                    </div>
+                {% endif %}
             </strong>
         </div>
+
     </div>
 
     <div id="chart">

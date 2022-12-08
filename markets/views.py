@@ -55,6 +55,7 @@ def get_initial_chart_data(request, symbol):
         candle_data = get_candle_data(BINANCE_URL, symbol=symbol, interval="1m")
         candle_dict = {"candles": candle_data.json()}
         return JsonResponse(candle_dict)
+
 @csrf_exempt
 def addOrder(request):
 
@@ -62,10 +63,28 @@ def addOrder(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
-    # Check recipient emails
+    # Check the request body for candle messages
     data = json.loads(request.body)
-    Product.title = data['content']['s']
-    Candle()
+    if data:
+        exchange_id = data['content']['s']
+        title = data['content']['s']
+        batch = data['content']['batch_id']
+        open = float(data['content']['k']['o'])
+        close = float(data['content']['k']['c'])
+        high = float(data['content']['k']['h'])
+        low = float(data['content']['k']['l'])
+        volume = float(data['content']['k']['l'])
+
+        try:
+            product = Product.objects.get(exchange_id=exchange_id)
+        except Product.DoesNotExist:
+           Product.objects.create(title=title, exchange_id=exchange_id)
+           product = Product.objects.get(exchange_id=exchange_id)
+
+        if (product):
+            Candle.objects.create(batch=batch, product_id=product.id, open=open, high=high, low=low, close=close, volume=volume, user_id=request.user.id )
+
+    return JsonResponse({"message": "kline added successfully."}, status=201)
 
 def get_candle_data(url, symbol, interval="1m"):
     # General function to pull candle information from Binance
