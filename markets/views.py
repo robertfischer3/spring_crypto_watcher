@@ -1,4 +1,3 @@
-
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, Http404, HttpResponseNotFound, HttpResponse
 from django.http import JsonResponse
@@ -15,7 +14,6 @@ import json, hmac, hashlib, time, requests, base64
 import json
 
 BINANCE_URL = 'https://api.binance.us'
-url_stuff = 'https://api.binance.us/api/v3/klines?symbol=ETHUSD&interval=1m'
 BINANCE_EXCH_INFO_URL = "https://api.binance.us/api/v3/exchangeInfo"
 
 
@@ -43,6 +41,22 @@ class Analytics(View):
         }
         return render(request, 'markets/analytics.html', context)
 
+    def post(self, request):
+        pass
+
+
+def get_ticker(request, symbol):
+    """
+    Retreiving 24 hour ticker data by symbol
+    :param request:
+    :param symbol:
+    :return:
+    """
+    if request.method == "GET":
+        ticker = requests.get(f"{BINANCE_URL}/api/v3/ticker/24hr?symbol={symbol}")
+        ticker_dict = {"ticker": ticker.json()}
+        return JsonResponse(ticker_dict)
+
 
 def get_initial_chart_data(request, symbol):
     """
@@ -56,9 +70,9 @@ def get_initial_chart_data(request, symbol):
         candle_dict = {"candles": candle_data.json()}
         return JsonResponse(candle_dict)
 
+
 @csrf_exempt
 def addOrder(request):
-
     # Composing a new email must be via POST
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
@@ -78,13 +92,15 @@ def addOrder(request):
         try:
             product = Product.objects.get(exchange_id=exchange_id)
         except Product.DoesNotExist:
-           Product.objects.create(title=title, exchange_id=exchange_id)
-           product = Product.objects.get(exchange_id=exchange_id)
+            Product.objects.create(title=title, exchange_id=exchange_id)
+            product = Product.objects.get(exchange_id=exchange_id)
 
         if (product):
-            Candle.objects.create(batch=batch, product_id=product.id, open=open, high=high, low=low, close=close, volume=volume, user_id=request.user.id )
+            Candle.objects.create(batch=batch, product_id=product.id, open=open, high=high, low=low, close=close,
+                                  volume=volume, user_id=request.user.id)
 
     return JsonResponse({"message": "kline added successfully."}, status=201)
+
 
 def get_candle_data(url, symbol, interval="1m"):
     # General function to pull candle information from Binance

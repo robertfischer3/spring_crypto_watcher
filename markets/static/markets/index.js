@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
     chart = new ApexCharts(document.querySelector("#chart"), options);
     chart.render();
 
- const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
+    const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
     if (exchangeSelector) {
         //This method call load the select dropdown
         loadSelect(exchangeSelector);
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
     checkBox = document.querySelector('#save_candle_data');
-    if (checkBox){
+    if (checkBox) {
         checkBox.addEventListener('click', createBatchId);
     }
 
@@ -65,7 +65,7 @@ function loadCandleChartData(jsonObjects, records, line) {
     if (records) {
         records.length = 0;
     }
-    if (line){
+    if (line) {
         line.length = 0;
     }
     jsonObjects.forEach((entry, index) => {
@@ -87,7 +87,7 @@ function loadCandleChartData(jsonObjects, records, line) {
         let j = {x: (new Date(entry[0])), y: record};
         records.push(j);
 
-});
+    });
 }
 
 function openWebSocket() {
@@ -154,7 +154,7 @@ function openWebSocket() {
                 }]);
             }
             candle_data_lake = document.querySelector('#save_candle_data')
-            if (candle_data_lake){
+            if (candle_data_lake) {
                 check_value = candle_data_lake.value
             }
         }
@@ -168,23 +168,23 @@ function openWebSocket() {
 
 }
 
-function createBatchId(){
+function createBatchId() {
     //This method creates a batch id for grouping records together for analysis
     checkBox = document.querySelector('#save_candle_data');
-    if (checkBox && checkBox.checked){
+    if (checkBox && checkBox.checked) {
         let uuid = crypto.randomUUID();
         batch_div = document.querySelector('#report_transaction_id_01');
         batch_div.innerHTML = uuid;
         batchMsg = document.querySelector('#batch_message_01');
         batchMsg.innerHTML = "Batch Record Group ID";
-    }
-    else if (checkBox){
+    } else if (checkBox) {
         batchMsg = document.querySelector('#batch_message_01');
         batchMsg.innerHTML = "";
         batch_div = document.querySelector('#report_transaction_id_01');
         batch_div.innerHTML = "";
     }
 }
+
 function getCandleRecords(symbol) {
 
     let candle_records = undefined;
@@ -204,10 +204,30 @@ function getCandleRecords(symbol) {
             loadCandleChartData(candle_records, records, line);
         });
 }
-function recordOrder(order){
-      /*
-    This method records the incoming order message to save for later analysis
-     */
+
+function get24hrTicker(symbol) {
+
+    let ticker_records = undefined;
+    console.log(`ticker/${symbol}`);
+
+    fetch(`ticker/${symbol}`)
+        .then(response => {
+            if (response.ok) {
+                return response.json()
+            }
+            return Promise.reject(response);
+        })
+        .then(entry => {
+            console.log(entry);
+            ticker_records = entry.ticker;
+            populateTable(ticker_records);
+        });
+}
+
+function recordOrder(order) {
+    /*
+  This method records the incoming order message to save for later analysis
+   */
 
     fetch(`/addorder`, {
         method: 'POST',
@@ -227,6 +247,7 @@ function recordOrder(order){
 
         });
 }
+
 function loadSelect(selectObj) {
     // This function loads the select control with product data
     // received from a call to the Django backend
@@ -254,8 +275,11 @@ function loadSelect(selectObj) {
 }
 
 function onChangeCurrency(symbolSelected) {
+
+    // This method handles the user updating the currency selection
     console.log(`Currency value changed to ${symbolSelected}`)
 
+    // Determine if the websocket is open
     if (socket.readyState === 1) {
         unsubscribeWebSocket(symbol);
         // Set symbol at the global level
@@ -263,24 +287,38 @@ function onChangeCurrency(symbolSelected) {
         socket.close();
 
     }
-
+    // Retrieve new candle records
     getCandleRecords(symbolSelected);
+    // Retrieve new ticker records
+    get24hrTicker(symbolSelected);
     // We load the charts with initial data
     //loadCandleChartData(jsonObjects, records, line);
     symbol = symbolSelected
+    // Need to clear order table values
+    askOrders.length = 0
+    bidOrders.length = 0
+
+    //Clear out Order Tables on screen
+    askTableBody = document.querySelector('#ask_table_body_01');
+    askTableBody.innerHTML = "";
+     //Clear out Order Tables on screen
+    bidTableBody = document.querySelector('#bid_table_body_01');
+    bidTableBody.innerHTML = "";
+
+    //Open new websocket for updated symbole query
     socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
     //Update current data statics
     socket.onopen = openWebSocket;
 }
 
 function updateStatistics(records) {
-
     //This method calculates statistic to the array of values on the screen.
     statsArr = [];
 
     records.forEach((entry) => {
         statsArr.push(parseFloat(entry.y[0]));
     })
+    //Calculating the variance of the array
     let variance = findVariance(statsArr);
     //Finding the average of the array
     let average = statsArr.reduce((a, b) => a + b, 0) / statsArr.length;
@@ -291,14 +329,19 @@ function updateStatistics(records) {
             (arr.length - (usePopulation ? 0 : 1))
         );
     };
+
+    //Calculate standard deviation
     let standardDev = standardDeviation(statsArr, true);
 
+    // Updaate average number
     averageDiv = document.querySelector('#recent_average');
     averageDiv.innerHTML = `Mean ${average.toFixed(3)}`;
 
+    // Update current variance number
     varianceDiv = document.querySelector('#current_variance')
     varianceDiv.innerHTML = `Variance ${variance.toFixed(3)}`
 
+    //Update current standard deviation
     standardDeviationDiv = document.querySelector('#current_standard_deviation');
     standardDeviationDiv.innerHTML = `Standard Deviation ${standardDev.toFixed(3)}`;
 
@@ -307,12 +350,17 @@ function updateStatistics(records) {
 
 function processOrderBook(orderBookRow) {
     // This function processes the order book row for both bid and ask values
+    currentAsk = document.querySelector('#current_ask_01');
+    currentBid = document.querySelector('#current_bid_01');
+
+    //Process Bid record data
     let tempRowBid = {s: orderBookRow.s, b: parseFloat(orderBookRow.b), B: parseFloat(orderBookRow.B)};
     if (tempRowBid.s !== undefined) {
         currentBid.innerHTML = `Current Bid <strong>${orderBookRow.b}, ${orderBookRow.B} </strong>`;
         bidOrders.push(tempRowBid);
     }
 
+    // //Process Ask record data
     let tempRowAsk = {s: orderBookRow.s, a: parseFloat(orderBookRow.a), A: parseFloat(orderBookRow.A)};
     if (tempRowAsk.s !== undefined) {
         currentAsk.innerHTML = `Current Ask <strong>${orderBookRow.a}, ${orderBookRow.A}</strong>`;
@@ -320,7 +368,7 @@ function processOrderBook(orderBookRow) {
     }
 
 
-    // Sort the array
+    // Sort the array, we are interested in the highest bids
     bidOrders.sort((a, b) => b.b - a.b);
     askOrders.sort((a, b) => b.a - a.a);
 
@@ -343,7 +391,6 @@ function processOrderBook(orderBookRow) {
 }
 
 const findVariance = (recordsArray = []) => {
-
     // This function calculates the variance found in the chart
     // data
     if (!recordsArray.length) {
@@ -364,12 +411,14 @@ const findVariance = (recordsArray = []) => {
 function populateTable(jsonData) {
     //Populate data in 24 hour ticker table
     ticker_table = document.querySelector('#table_body_01');
+    ticker_table.innerHTML = "";
     //Check if table is in the document
     if (ticker_table) {
         const keys = Object.keys(jsonData);
         for (let i = 0; i < keys.length; i++) {
             const key = keys[i];
 
+            //Fields are dynamically generated
             const tableRow = document.createElement('tr');
             const tableColKey = document.createElement('td');
             const tableColData = document.createElement('td');

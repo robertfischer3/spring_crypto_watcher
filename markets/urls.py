@@ -9,6 +9,7 @@ urlpatterns = [
     path("", Index.as_view(), name="index"),
     path("analytics", Analytics.as_view(), name="analytics"),
     path("products", views.get_products_sublist, name="products"),
+    path("ticker/<str:symbol>", views.get_ticker, name="ticker"),
     path("addorder", views.addOrder, name="addorder"),
     path("candle/<str:symbol>", views.get_initial_chart_data, name="candle"),
     path("login", views.login_view, name="login"),
