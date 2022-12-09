@@ -186,9 +186,8 @@ function createBatchId() {
 }
 
 function getCandleRecords(symbol) {
-
+    // This method pulls new candle data for a particular symbol
     let candle_records = undefined;
-    console.log(`candle/${symbol}`);
 
     fetch(`candle/${symbol}`)
         .then(response => {
@@ -198,9 +197,8 @@ function getCandleRecords(symbol) {
             return Promise.reject(response);
         })
         .then(entry => {
-
-            console.log(entry);
             candle_records = entry.candles;
+            // Reload the Candle Chart Data
             loadCandleChartData(candle_records, records, line);
         });
 }
@@ -218,7 +216,7 @@ function get24hrTicker(symbol) {
             return Promise.reject(response);
         })
         .then(entry => {
-            console.log(entry);
+
             ticker_records = entry.ticker;
             populateTable(ticker_records);
         });
@@ -244,7 +242,7 @@ function recordOrder(order) {
             return Promise.reject(response);
         })
         .catch((response) => {
-
+             console.log(response);
         });
 }
 

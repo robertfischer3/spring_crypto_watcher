@@ -43,4 +43,4 @@ class Candle(models.Model):
         verbose_name_plural = "candles"
 
     def __str__(self):
-        return f"Candle gathered by report {self.report} on {self.created} with id {self.id}"
+        return f"Candle {self.created} with id {self.id}"

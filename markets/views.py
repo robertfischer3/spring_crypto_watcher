@@ -8,6 +8,7 @@ from markets.models import User
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from .models import Candle, Product
+from markets.japanesecandles import find_japanese_patterns
 
 import json, hmac, hashlib, time, requests, base64
 
@@ -44,6 +45,11 @@ class Analytics(View):
     def post(self, request):
         pass
 
+def get_candle_patterns(request, batch):
+    if request.method == "GET":
+        candles = Candle.objects.filter(batch=batch)
+        df = find_japanese_patterns(candles)
+        return JsonResponse({"test":"patterns"})
 
 def get_ticker(request, symbol):
     """
