@@ -2,7 +2,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     processData('9500a31a-0c68-4449-9508-d4059847d8f1')
 
+    const batchSelector = document.querySelector('#Batches_01')
+    if (batchSelector) {
+        //This method call load the select dropdown
+        loadSelect(batchSelector);
+    }
+
 });
+function loadSelect(selectObj, batches) {
+    // This function loads the select control with product data
+    // received from a call to the Django backend
+    console.log(batches);
+}
+
 
 function processData(batch) {
 //Pull back batch data from analysis

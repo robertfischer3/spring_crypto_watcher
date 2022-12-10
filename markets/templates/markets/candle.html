@@ -5,13 +5,10 @@
     <div id="analysis_table_01" class="container table-responsive p-3 my-3 border">
         <div class="row">
             <div class="col">
-                <select name="Batches" size="1">
-                    <option value="Merceders"> Merceders</option>
-                    <option value="BMW"> BMW</option>
-                    <option value="Jaguar"> Jaguar</option>
-                    <option value="Lamborghini"> Lamborghini</option>
-                    <option value="Ferrari"> Ferrari</option>
-                    <option value="Ford"> Ford</option>
+                <select name="Batches_01" size="1">
+                    {% for batch in user_batches %}
+                         <option value="{{ batch }}"> Merceders </option>
+                    {%  endfor %}
                 </select>
             </div>
             <div class="col">
