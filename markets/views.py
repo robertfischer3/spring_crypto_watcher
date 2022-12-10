@@ -37,13 +37,20 @@ class Index(View):
 
 class Analytics(View):
     def get(self, request):
-        context = {
-            'count': 'Hello Analytics'
-        }
+        context = {}
         return render(request, 'markets/analytics.html', context)
 
-    def post(self, request):
-        pass
+class CandleView(View):
+    def get(self, request):
+        # Authenticated users view their saved candle data
+        if request.user.is_authenticated:
+            user_batches = Candle.objects.filter(user_id=request.user).values_list('user_id', flat=True).distinct()
+            context = {"user_batches": user_batches}
+            return render(request, "markets/candle.html", context=context)
+
+        # Everyone else is prompted to sign in
+        else:
+            return HttpResponseRedirect(reverse("login"))
 
 
 def get_candle_patterns(request, batch):

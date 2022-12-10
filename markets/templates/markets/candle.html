@@ -1,10 +1,48 @@
 {% extends "markets/layout.html" %}
 {% load static %}
 {% block body %}
-   <div class="container">
-        <br>
 
+    <div id="analysis_table_01" class="container table-responsive p-3 my-3 border">
+        <div class="row">
+            <div class="col">
+                <select name="Batches" size="1">
+                    <option value="Merceders"> Merceders</option>
+                    <option value="BMW"> BMW</option>
+                    <option value="Jaguar"> Jaguar</option>
+                    <option value="Lamborghini"> Lamborghini</option>
+                    <option value="Ferrari"> Ferrari</option>
+                    <option value="Ford"> Ford</option>
+                </select>
+            </div>
+            <div class="col">
+                <br>
+                <table id="table_01" class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Exchange</th>
+                        <th scope="col">Created</th>
+                        <th scope="col">Open</th>
+                        <th scope="col">High</th>
+                        <th scope="col">Low</th>
+                        <th scope="col">Close</th>
+                        <th scope="col">Volume</th>
 
+                        <th scope="col">Bullish Swing</th>
+                        <th scope="col">Bearish Swing</th>
+                        <th scope="col">Bullish Pinbar</th>
+                        <th scope="col">Bearish Pinbar</th>
+                        <th scope="col">Inside Bar</th>
+                        <th scope="col">Outside Bar</th>
+                        <th scope="col">Bullish Engulfing</th>
+                        <th scope="col">Bearish Engulfing</th>
+                    </tr>
+                    </thead>
+                    <tbody id="data_saved_analysis_01" class="table-group-divider">
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     {% block script %}
         <script src="{% static 'markets/candle.js' %}"></script>

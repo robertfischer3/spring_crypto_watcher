@@ -62,6 +62,9 @@
                     <a class="nav-link" href="#"><strong>User {{ user.username }}</strong></a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="{% url 'markets:batchanalysis' %}">Batch Candle Analysis</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="{% url 'markets:logout' %}">Log Out</a>
                 </li>
             {% else %}

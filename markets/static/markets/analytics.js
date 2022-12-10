@@ -125,9 +125,7 @@ function initializeChart() {
         dataLabels: {
             enabled: false
         },
-        stroke: {
-            curve: 'smooth'
-        },
+
         title: {
             text: 'Market Updating Chart',
             align: 'center'
