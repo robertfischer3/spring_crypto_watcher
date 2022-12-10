@@ -45,11 +45,25 @@ class Analytics(View):
     def post(self, request):
         pass
 
+
 def get_candle_patterns(request, batch):
+    """
+    This method returns the row evaluations looking for candle patterns.
+    :param request:
+    :param batch:
+    :return:
+    """
     if request.method == "GET":
-        candles = Candle.objects.filter(batch=batch)
+        candles = Candle.objects.filter(batch=batch).select_related().values('id', 'open', 'high', 'low', 'close', 'volume', 'created',
+                                                                             'user__username', 'product__exchange_id')
         df = find_japanese_patterns(candles)
-        return JsonResponse({"test":"patterns"})
+        if (df.shape[0] > 0):
+
+            patterns = df.to_json(orient='records')
+            return JsonResponse({"patterns": patterns})
+        else:
+            return JsonResponse({"error": "Candle patterns function find_japanese_patterns returned no records"})
+
 
 def get_ticker(request, symbol):
     """
@@ -110,7 +124,7 @@ def addOrder(request):
 
 def get_candle_data(url, symbol, interval="1m"):
     # General function to pull candle information from Binance
-    # This funcution could also been done on the client side with Javascript
+    # This function could also been done on the client side with Javascript
     # However, addition statistical data modeling can process the data with
     # Python data science libraries which may be included in the future
     candle_data = requests.get(f"{url}/api/v3/klines?symbol={symbol}&interval={interval}")

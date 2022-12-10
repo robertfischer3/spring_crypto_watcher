@@ -15,7 +15,7 @@ def find_japanese_patterns(historical):
     :param historical:
     :return:
     """
-    df = pd.DataFrame(historical.values())
+    df = pd.DataFrame(historical)
 
     for i in range(2, df.shape[0]):
         current = df.iloc[i, :]

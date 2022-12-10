@@ -1,13 +1,16 @@
-
+.new_row_fade_02 {
+    background-color: lightgreen;
+    animation-name: fadeask;
+    animation-fill-mode: forwards;
+    animation-duration: 1s;
+    animation-delay: 0s;
+}
 
 .new_row_fade_01 {
-  background-color:red;
-  animation-name:bckanimrow;
-  animation-fill-mode:forwards;
-  animation-duration:3s;
-  animation-delay:0s;
+    background-color: red;
+    animation-name: fadebid;
+    animation-fill-mode: forwards;
+    animation-duration: 1s;
+    animation-delay: 0s;
 }
-@keyframes bckanimrow {
-  0% {background-color:red;}
-  100% { background-color:transparent;}
-}
+

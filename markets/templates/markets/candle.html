@@ -1,10 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "markets/layout.html" %}
+{% load static %}
+{% block body %}
+   <div class="container">
+        <br>
 
-</body>
-</html>
+
+    </div>
+    {% block script %}
+        <script src="{% static 'markets/candle.js' %}"></script>
+    {% endblock %}
+{% endblock %}

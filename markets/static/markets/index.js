@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function () {
         checkBox.addEventListener('click', createBatchId);
     }
 
-
 });
 
 function loadCandleChartData(jsonObjects, records, line) {
