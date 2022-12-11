@@ -1,7 +1,15 @@
 {% extends "markets/layout.html" %}
 {% load static %}
 {% block body %}
-
+    <div class="row">
+        <div class="col">
+            <p> Select a exchange to track:
+                <select id="select_cryptocurrency_01">
+                    <option value="ETH-USD">ETH-USD</option>
+                </select>
+            </p>
+        </div>
+    </div>
     <button class="button is-normal is-responsive" id="btn_start_charting_01">
         Start Charting
     </button>
@@ -9,6 +17,7 @@
     <button class="button is-normal is-responsive" id="btn_stop_charting_01">
         Stop
     </button>
+
     <div class="container">
 
         <div class="row">
@@ -20,27 +29,50 @@
             </strong></div>
         </div>
     </div>
-    <div class="container">
-        <select name="batch_id_selection" size="8">
 
-        </select>
-    </div>
+    <div id="loading_msg_01">Chart Loading...</div>
     <div id="chart">
     </div>
-
     <div class="container">
         <br>
-        <table id="incoming_action_table_01" class="table table-bordered table-striped">
-            <tr>
-                <th>Product</th>
-                <th>Change</th>
-                <th>Price</th>
-                <th>Volume</th>
-                <th>Time</th>
-            </tr>
-        </table>
+        <div class="table-responsive">
+            <table id="incoming_action_table_01" class="table table-bordered table-striped">
+                <tr>
+                    <td>Event type: <span id="event_type"></span></td>
+                    <td>Event time: <span id="event_time"></span></td>
+                    <td>Symbol: <span id="symbol"></span></td>
+                    <td>Price change: <span id="price_change"></span></td>
+                    <td>Price change percent: <span id="price_change_percent"></span></td>
 
+                </tr>
+                <tr>
+                    <td>Weighted average price: <span id="weighted_average_price"></span></td>
+                    <td>First trade: <span id="first_trade"></span></td>
+                    <td>Last price: <span id="last_price"></span></td>
+                    <td>Last quantity: <span id="last_quantity"></span></td>
+                    <td>Best bid price: <span id="best_bid_price"></span></td>
+                </tr>
+                <tr>
+                    <td>Best bid quantity: <span id="best_bid_quatity"></span></td>
+                    <td>Best ask price: <span id="best_ask_price"></span></td>
+                    <td>Best ask quantity: <span id="best_ask_quantity"></span></td>
+                    <td>Open price: <span id="open_price"></span></td>
+                    <td>High price: <span id="high_price"></span></td>
+                </tr>
+                <tr>
+                    <td>Low price: <span id="low_price"></span></td>
+                    <td>Total traded base asset volume: <span id="total_base_asset_volume"></span></td>
+                    <td>Total traded quote asset volume: <span id="total_traded_quote_asset_volume"></span></td>
+                    <td>Statistics open time: <span id="statistics_open_time"></span></td>
+                    <td>Statistics close time: <span id="statistics_close_time"></span></td>
+                </tr>
+                <tr>
+                    <td>Total number of trades: <span id="total_number_of_trades"></span></td>
+                </tr>
+            </table>
+        </div>
     </div>
+
     {% block script %}
         <script src="{% static 'markets/analytics.js' %}"></script>
     {% endblock %}

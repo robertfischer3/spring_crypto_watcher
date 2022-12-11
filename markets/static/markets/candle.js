@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (batchSelector) {
         if (batchSelector.childElementCount > 1){
             batchSelector.onchange = function () {
+                //Grab the batch id drop down
                 const batchIdSelector = document.querySelector("#Batches_01");
                 if(batchIdSelector && batchIdSelector.value !== 'None'){
                     // If a saved data batch has been selected, then it should be loaded
@@ -32,12 +33,15 @@ function processData(batch) {
         })
         .then(entry => {
             patterns = JSON.parse(entry.patterns);
-            createTable(patterns)
+            //Create a table to display the response
+            createTable(patterns);
         });
 }
 
 function createTable(patterns) {
 
+    // Creates a table to display the recorded candle feed an indicate if a candle pattern has been
+    // identified
     const batchSelector = document.querySelector('#Batches_01');
     const dataSavedAnalysis = document.querySelector('#data_saved_analysis_01');
 

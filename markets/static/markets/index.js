@@ -1,3 +1,4 @@
+
 //Global Variables to be shared among methods
 let socket;
 let symbol = "BTCUSD";
@@ -570,10 +571,10 @@ function configureChart(line, chart) {
             custom: [function ({seriesIndex, dataPointIndex, w}) {
                 return w.globals.series[seriesIndex][dataPointIndex];
             }, function ({seriesIndex, dataPointIndex, w}) {
-                var o = w.globals.seriesCandleO[seriesIndex][dataPointIndex];
-                var h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
-                var l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
-                var c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
+                let o = w.globals.seriesCandleO[seriesIndex][dataPointIndex];
+                let h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
+                let l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
+                let c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
                 return (
                     ''
                 );
