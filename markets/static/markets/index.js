@@ -1,23 +1,23 @@
-let socket = undefined;
-
-let data = [0];
+//Global Variables to be shared among methods
+let socket;
 let symbol = "BTCUSD";
 let askOrders = [];
 let bidOrders = [];
-let chart = undefined;
+let chart;
 
 const records = [];
 const line = [];
 
-messageNumber = 0;
 
-WEBSOCKET_URL = 'wss://stream.binance.us:9443/ws';
+let WEBSOCKET_URL = 'wss://stream.binance.us:9443/ws';
 
 document.addEventListener('DOMContentLoaded', function () {
 
+    // Grab incoming initialization data
     const results = document.querySelector('#results').textContent;
     const ticker = document.querySelector('#ticker').textContent;
 
+    // Convert initialization data to JSON objects for processing
     const jsonObjects = JSON.parse(results);
     const jsonTicker = JSON.parse(ticker);
 
@@ -30,13 +30,13 @@ document.addEventListener('DOMContentLoaded', function () {
     updateStatistics(records);
 
     // Creating the initial chart configuration
-    options = configureChart(line, records);
+    let options = configureChart(line, records);
 
     // Creating a new chart and rendering it
     chart = new ApexCharts(document.querySelector("#chart"), options);
     chart.render();
 
-    const exchangeSelector = document.querySelector('#select_cryptocurrency_01')
+    const exchangeSelector = document.querySelector('#select_cryptocurrency_01');
     if (exchangeSelector) {
         //This method call load the select dropdown
         loadSelect(exchangeSelector);
@@ -45,13 +45,13 @@ document.addEventListener('DOMContentLoaded', function () {
             // symbolSelector.value = symbol;
             // This call initiates a connection to a websocket
             onChangeCurrency(symbolSelector.value);
-        }
+        };
         if (socket === undefined) {
             socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
             socket.onopen = openWebSocket;
         }
     }
-    checkBox = document.querySelector('#save_candle_data');
+    const checkBox = document.querySelector('#save_candle_data');
     if (checkBox) {
         checkBox.addEventListener('click', createBatchId);
     }
@@ -100,9 +100,6 @@ function openWebSocket() {
     // from the websocket and process them
     socket.addEventListener('message', (event) => {
 
-        console.log('Message from server ', event.data);
-        currentAsk = document.querySelector('#current_ask_01');
-        currentBid = document.querySelector('#current_bid_01');
 
         const message = JSON.parse(event.data);
 
@@ -111,9 +108,9 @@ function openWebSocket() {
         // arrives without a performance hit
         if (message.e === 'kline') {
             //Here we provide a mechanism to save Candle Chart History for backtesting.
-            checkBox = document.querySelector('#save_candle_data');
+            const checkBox = document.querySelector('#save_candle_data');
             if (checkBox && checkBox.checked) {
-                batch_id = document.querySelector('#report_transaction_id_01');
+                const batch_id = document.querySelector('#report_transaction_id_01');
                 message.batch_id = batch_id.innerHTML;
                 recordOrder(message);
             }
@@ -133,10 +130,12 @@ function openWebSocket() {
             updateRecord.push(message.k.c);
 
             let j = {x: (new Date(message.E)), y: updateRecord};
-            console.log(j);
+
+            //Add new record, remove oldest
             records.push(j);
             records.shift();
 
+            //Update the statistics
             updateStatistics(records);
 
             let chartDiv = document.querySelector("#chart");
@@ -152,9 +151,9 @@ function openWebSocket() {
                     data: records
                 }]);
             }
-            candle_data_lake = document.querySelector('#save_candle_data')
+            const candle_data_lake = document.querySelector('#save_candle_data');
             if (candle_data_lake) {
-                check_value = candle_data_lake.value
+                let check_value = candle_data_lake.value;
             }
         }
         // if the message meets the format for an order
@@ -169,54 +168,54 @@ function openWebSocket() {
 
 function createBatchId() {
     //This method creates a batch id for grouping records together for analysis
-    checkBox = document.querySelector('#save_candle_data');
+    const checkBox = document.querySelector('#save_candle_data');
     if (checkBox && checkBox.checked) {
         let uuid = crypto.randomUUID();
-        batch_div = document.querySelector('#report_transaction_id_01');
+        const batch_div = document.querySelector('#report_transaction_id_01');
         batch_div.innerHTML = uuid;
-        batchMsg = document.querySelector('#batch_message_01');
+        const batchMsg = document.querySelector('#batch_message_01');
         batchMsg.innerHTML = "Batch Record Group ID";
     } else if (checkBox) {
-        batchMsg = document.querySelector('#batch_message_01');
+        const batchMsg = document.querySelector('#batch_message_01');
         batchMsg.innerHTML = "";
-        batch_div = document.querySelector('#report_transaction_id_01');
+        const batch_div = document.querySelector('#report_transaction_id_01');
         batch_div.innerHTML = "";
     }
 }
 
 function getCandleRecords(symbol) {
     // This method pulls new candle data for a particular symbol
-    let candle_records = undefined;
 
     fetch(`candle/${symbol}`)
         .then(response => {
             if (response.ok) {
-                return response.json()
+                return response.json();
             }
             return Promise.reject(response);
         })
         .then(entry => {
-            candle_records = entry.candles;
+            const candle_records = entry.candles;
             // Reload the Candle Chart Data
             loadCandleChartData(candle_records, records, line);
         });
 }
 
 function get24hrTicker(symbol) {
-
+//This method pulls 24 hour ticker data
     let ticker_records = undefined;
     console.log(`ticker/${symbol}`);
 
     fetch(`ticker/${symbol}`)
         .then(response => {
             if (response.ok) {
-                return response.json()
+                return response.json();
             }
             return Promise.reject(response);
         })
         .then(entry => {
 
             ticker_records = entry.ticker;
+            //Populate the 24-hour ticker table
             populateTable(ticker_records);
         });
 }
@@ -251,7 +250,7 @@ function loadSelect(selectObj) {
     fetch(`products`)
         .then(response => {
             if (response.ok) {
-                return response.json()
+                return response.json();
             }
             return Promise.reject(response);
         })
@@ -261,6 +260,7 @@ function loadSelect(selectObj) {
             //reset the drop list given we have a server response
             selectObj.innerHTML = "";
 
+            // Populate the option values for the drop-down
             for (let key in products) {
                 let option = document.createElement('option');
                 option.setAttribute('value', products[key]);
@@ -274,7 +274,6 @@ function loadSelect(selectObj) {
 function onChangeCurrency(symbolSelected) {
 
     // This method handles the user updating the currency selection
-    console.log(`Currency value changed to ${symbolSelected}`)
 
     // Determine if the websocket is open
     if (socket.readyState === 1) {
@@ -290,16 +289,16 @@ function onChangeCurrency(symbolSelected) {
     get24hrTicker(symbolSelected);
     // We load the charts with initial data
     //loadCandleChartData(jsonObjects, records, line);
-    symbol = symbolSelected
+    symbol = symbolSelected;
     // Need to clear order table values
-    askOrders.length = 0
-    bidOrders.length = 0
+    askOrders.length = 0;
+    bidOrders.length = 0;
 
     //Clear out Order Tables on screen
-    askTableBody = document.querySelector('#ask_table_body_01');
+    const askTableBody = document.querySelector('#ask_table_body_01');
     askTableBody.innerHTML = "";
     //Clear out Order Tables on screen
-    bidTableBody = document.querySelector('#bid_table_body_01');
+    const bidTableBody = document.querySelector('#bid_table_body_01');
     bidTableBody.innerHTML = "";
 
     //Open new websocket for updated symbole query
@@ -310,11 +309,11 @@ function onChangeCurrency(symbolSelected) {
 
 function updateStatistics(records) {
     //This method calculates statistic to the array of values on the screen.
-    statsArr = [];
+    let statsArr = [];
 
     records.forEach((entry) => {
         statsArr.push(parseFloat(entry.y[0]));
-    })
+    });
     //Calculating the variance of the array
     let variance = findVariance(statsArr);
     //Finding the average of the array
@@ -331,15 +330,15 @@ function updateStatistics(records) {
     let standardDev = standardDeviation(statsArr, true);
 
     // Updaate average number
-    averageDiv = document.querySelector('#recent_average');
+    const averageDiv = document.querySelector('#recent_average');
     averageDiv.innerHTML = `Mean ${average.toFixed(3)}`;
 
     // Update current variance number
-    varianceDiv = document.querySelector('#current_variance')
-    varianceDiv.innerHTML = `Variance ${variance.toFixed(3)}`
+    const varianceDiv = document.querySelector('#current_variance');
+    varianceDiv.innerHTML = `Variance ${variance.toFixed(3)}`;
 
     //Update current standard deviation
-    standardDeviationDiv = document.querySelector('#current_standard_deviation');
+    const standardDeviationDiv = document.querySelector('#current_standard_deviation');
     standardDeviationDiv.innerHTML = `Standard Deviation ${standardDev.toFixed(3)}`;
 
 
@@ -347,8 +346,8 @@ function updateStatistics(records) {
 
 function processOrderBook(orderBookRow) {
     // This function processes the order book row for both bid and ask values
-    currentAsk = document.querySelector('#current_ask_01');
-    currentBid = document.querySelector('#current_bid_01');
+    const currentAsk = document.querySelector('#current_ask_01');
+    const currentBid = document.querySelector('#current_bid_01');
 
     //Process Bid record data
     let tempRowBid = {s: orderBookRow.s, b: parseFloat(orderBookRow.b), B: parseFloat(orderBookRow.B)};
@@ -357,7 +356,7 @@ function processOrderBook(orderBookRow) {
         bidOrders.push(tempRowBid);
     }
 
-    // //Process Ask record data
+    //Process Ask record data
     let tempRowAsk = {s: orderBookRow.s, a: parseFloat(orderBookRow.a), A: parseFloat(orderBookRow.A)};
     if (tempRowAsk.s !== undefined) {
         currentAsk.innerHTML = `Current Ask <strong>${orderBookRow.a}, ${orderBookRow.A}</strong>`;
@@ -410,7 +409,7 @@ const findVariance = (recordsArray = []) => {
 
 function populateTable(jsonData) {
     //Populate data in 24 hour ticker table
-    ticker_table = document.querySelector('#table_body_01');
+    const ticker_table = document.querySelector('#table_body_01');
     //Reset the ticker table
     ticker_table.innerHTML = "";
     //Check if table is in the document
@@ -430,7 +429,7 @@ function populateTable(jsonData) {
             // Add columns to table row
             tableRow.append(tableColKey, tableColData);
             //Append the row to the table
-            ticker_table.append(tableRow)
+            ticker_table.append(tableRow);
 
         }
     }
@@ -440,14 +439,14 @@ function populateTable(jsonData) {
 function renderBidOrderRow(bidOrders) {
 
     //This method is used to build the dynamic bid order book rows
-    bidTableBody = document.querySelector('#bid_table_body_01');
+    const bidTableBody = document.querySelector('#bid_table_body_01');
     bidTableBody.innerHTML = "";
 
     bidOrders.forEach((entry, index) => {
         if (entry.s) {
 
             const tableRow = document.createElement('tr');
-            tableRow.setAttribute("class", "new_row_fade_01")
+            tableRow.setAttribute("class", "new_row_fade_01");
             const tableRowSymbol = document.createElement('td');
             const tableColKey = document.createElement('td');
             const tableColData = document.createElement('td');
@@ -457,7 +456,7 @@ function renderBidOrderRow(bidOrders) {
             tableColKey.innerHTML = entry.b;
             tableColData.innerHTML = entry.B;
             tableRow.append(tableRowSymbol, tableColKey, tableColData);
-            bidTableBody.append(tableRow)
+            bidTableBody.append(tableRow);
         }
 
     });
@@ -465,7 +464,7 @@ function renderBidOrderRow(bidOrders) {
 
 function renderAskOrderRow(askOrders) {
     //This method is used to build the dynamic ask order book rows
-    askTableBody = document.querySelector('#ask_table_body_01');
+    const askTableBody = document.querySelector('#ask_table_body_01');
     //Reset the control
     askTableBody.innerHTML = "";
     askOrders.forEach((entry, index) => {
@@ -473,7 +472,7 @@ function renderAskOrderRow(askOrders) {
 
             const tableRow = document.createElement('tr');
             //Class used for fade animation
-            tableRow.setAttribute("class", "new_row_fade_02")
+            tableRow.setAttribute("class", "new_row_fade_02");
             const tableRowSymbol = document.createElement('td');
             const tableColKey = document.createElement('td');
             const tableColData = document.createElement('td');
@@ -482,7 +481,7 @@ function renderAskOrderRow(askOrders) {
             tableColKey.innerHTML = entry.a;
             tableColData.innerHTML = entry.A;
             tableRow.append(tableRowSymbol, tableColKey, tableColData);
-            askTableBody.append(tableRow)
+            askTableBody.append(tableRow);
         }
 
     });
@@ -539,6 +538,8 @@ function splitOnCapitals(newString) {
 }
 
 function configureChart(line, chart) {
+  // This method creates the configuration needed by the candlestick chart
+  // The chart has two data series that are being charted
 
     let options = {
         series: [{
@@ -564,15 +565,15 @@ function configureChart(line, chart) {
         tooltip: {
             shared: true,
             custom: [function ({seriesIndex, dataPointIndex, w}) {
-                return w.globals.series[seriesIndex][dataPointIndex]
+                return w.globals.series[seriesIndex][dataPointIndex];
             }, function ({seriesIndex, dataPointIndex, w}) {
-                var o = w.globals.seriesCandleO[seriesIndex][dataPointIndex]
-                var h = w.globals.seriesCandleH[seriesIndex][dataPointIndex]
-                var l = w.globals.seriesCandleL[seriesIndex][dataPointIndex]
-                var c = w.globals.seriesCandleC[seriesIndex][dataPointIndex]
+                var o = w.globals.seriesCandleO[seriesIndex][dataPointIndex];
+                var h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
+                var l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
+                var c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
                 return (
                     ''
-                )
+                );
             }]
         },
         xaxis: {
@@ -581,9 +582,6 @@ function configureChart(line, chart) {
     };
     return options;
 }
-
-
-
 
 
 

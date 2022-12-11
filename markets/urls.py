@@ -4,7 +4,7 @@ from .views import Index
 from .views import Analytics
 from .views import CandleView
 
-app_name = 'markets'
+app_name = "markets"
 
 urlpatterns = [
     path("", Index.as_view(), name="index"),

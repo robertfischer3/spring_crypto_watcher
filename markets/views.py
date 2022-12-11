@@ -1,5 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseRedirect, Http404, HttpResponseNotFound, HttpResponse
+from django.http import (
+    HttpResponseRedirect,
+    Http404,
+    HttpResponseNotFound,
+    HttpResponse,
+)
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -10,11 +15,10 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Candle, Product
 from markets.japanesecandles import find_japanese_patterns
 
-import json, hmac, hashlib, time, requests, base64
-
+import requests
 import json
 
-BINANCE_URL = 'https://api.binance.us'
+BINANCE_URL = "https://api.binance.us"
 BINANCE_EXCH_INFO_URL = "https://api.binance.us/api/v3/exchangeInfo"
 
 
@@ -24,12 +28,9 @@ class Index(View):
         candle_data = get_candle_data(BINANCE_URL, symbol=symbol, interval="1m")
         ticker = requests.get(f"{BINANCE_URL}/api/v3/ticker/24hr?symbol={symbol}")
 
-        context = {
-            'results': candle_data.json(),
-            'ticker': ticker.json()
-        }
+        context = {"results": candle_data.json(), "ticker": ticker.json()}
 
-        return render(request, 'markets/index.html', context)
+        return render(request, "markets/index.html", context)
 
     def post(self, request):
         pass
@@ -38,13 +39,23 @@ class Index(View):
 class Analytics(View):
     def get(self, request):
         context = {}
-        return render(request, 'markets/analytics.html', context)
+        return render(request, "markets/analytics.html", context)
+
 
 class CandleView(View):
+    """
+    CandleView displays selected saved data
+    """
+
     def get(self, request):
         # Authenticated users view their saved candle data
         if request.user.is_authenticated:
-            user_batches = Candle.objects.filter(user_id=request.user).values_list('batch', flat=True).distinct()
+            # Finding the unique batches found in the database
+            user_batches = (
+                Candle.objects.filter(user_id=request.user)
+                .values_list("batch", flat=True)
+                .distinct()
+            )
             context = {"user_batches": user_batches}
             return render(request, "markets/candle.html", context=context)
 
@@ -61,15 +72,32 @@ def get_candle_patterns(request, batch):
     :return:
     """
     if request.method == "GET":
-        candles = Candle.objects.filter(batch=batch).select_related().values('id', 'open', 'high', 'low', 'close', 'volume', 'created',
-                                                                             'user__username', 'product__exchange_id')
+        candles = (
+            Candle.objects.filter(batch=batch)
+            .select_related()
+            .values(
+                "id",
+                "open",
+                "high",
+                "low",
+                "close",
+                "volume",
+                "created",
+                "user__username",
+                "product__exchange_id",
+            )
+        )
         df = find_japanese_patterns(candles)
-        if (df.shape[0] > 0):
+        if df.shape[0] > 0:
 
-            patterns = df.to_json(orient='records')
+            patterns = df.to_json(orient="records")
             return JsonResponse({"patterns": patterns})
         else:
-            return JsonResponse({"error": "Candle patterns function find_japanese_patterns returned no records"})
+            return JsonResponse(
+                {
+                    "error": "Candle patterns function find_japanese_patterns returned no records"
+                }
+            )
 
 
 def get_ticker(request, symbol):
@@ -107,14 +135,14 @@ def addOrder(request):
     # Check the request body for candle messages
     data = json.loads(request.body)
     if data:
-        exchange_id = data['content']['s']
-        title = data['content']['s']
-        batch = data['content']['batch_id']
-        open = float(data['content']['k']['o'])
-        close = float(data['content']['k']['c'])
-        high = float(data['content']['k']['h'])
-        low = float(data['content']['k']['l'])
-        volume = float(data['content']['k']['l'])
+        exchange_id = data["content"]["s"]
+        title = data["content"]["s"]
+        batch = data["content"]["batch_id"]
+        open = float(data["content"]["k"]["o"])
+        close = float(data["content"]["k"]["c"])
+        high = float(data["content"]["k"]["h"])
+        low = float(data["content"]["k"]["l"])
+        volume = float(data["content"]["k"]["l"])
 
         try:
             product = Product.objects.get(exchange_id=exchange_id)
@@ -122,9 +150,17 @@ def addOrder(request):
             Product.objects.create(title=title, exchange_id=exchange_id)
             product = Product.objects.get(exchange_id=exchange_id)
 
-        if (product):
-            Candle.objects.create(batch=batch, product_id=product.id, open=open, high=high, low=low, close=close,
-                                  volume=volume, user_id=request.user.id)
+        if product:
+            Candle.objects.create(
+                batch=batch,
+                product_id=product.id,
+                open=open,
+                high=high,
+                low=low,
+                close=close,
+                volume=volume,
+                user_id=request.user.id,
+            )
 
     return JsonResponse({"message": "kline added successfully."}, status=201)
 
@@ -134,7 +170,9 @@ def get_candle_data(url, symbol, interval="1m"):
     # This function could also been done on the client side with Javascript
     # However, addition statistical data modeling can process the data with
     # Python data science libraries which may be included in the future
-    candle_data = requests.get(f"{url}/api/v3/klines?symbol={symbol}&interval={interval}")
+    candle_data = requests.get(
+        f"{url}/api/v3/klines?symbol={symbol}&interval={interval}"
+    )
 
     return candle_data
 
@@ -154,10 +192,10 @@ def get_products_sublist(request):
         symbol_dict = {}
 
         exchange_content = json.loads(exhang_info.content)
-        symbols = exchange_content.get('symbols')
+        symbols = exchange_content.get("symbols")
         # Here we are only interested in a subset of products
         for symbol in symbols[0:10]:
-            symbol_code = symbol.get('symbol')
+            symbol_code = symbol.get("symbol")
             symbol_dict[symbol_code] = symbol_code
 
         return JsonResponse(symbol_dict)

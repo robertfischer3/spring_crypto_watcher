@@ -1,17 +1,21 @@
 {% extends "markets/layout.html" %}
 {% load static %}
 {% block body %}
-
+<h2>Pattern Discovery from Saved Data</h2>
     <div id="analysis_table_01" class="container table-responsive p-3 my-3 border">
         <div class="row">
             <div class="col">
                 {% if user_batches.count > 0 %}
-                    <select name="Batches_01" size="1">
+                    <select name="Batches_01" id="Batches_01" size="1">
+                        <option value="None">No batch selected</option>
                         {% for batch_id in user_batches %}
                             <option value="{{ batch_id }}">{{ batch_id }}</option>
                         {% endfor %}
                     </select>
+                {% else %}
+                    <h2>No batches saved yet</h2>
                 {% endif %}
+
             </div>
             <div class="col">
                 <br>

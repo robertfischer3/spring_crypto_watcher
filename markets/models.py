@@ -8,10 +8,12 @@ from django.utils import timezone
 class User(AbstractUser):
     pass
 
+
 class Product(models.Model):
     """
     Product model for providing exchange names to select from web service
     """
+
     title = models.CharField(max_length=255)
     exchange_id = models.CharField(max_length=50)
     created = models.DateTimeField(default=datetime.now)
@@ -28,7 +30,10 @@ class Candle(models.Model):
     """
     Candle model for storing historical price information
     """
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="products")
+
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="products"
+    )
     open = models.FloatField(default=float(0))
     high = models.FloatField(default=float(0))
     low = models.FloatField(default=float(0))
