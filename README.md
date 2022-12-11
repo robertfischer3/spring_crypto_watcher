@@ -186,7 +186,7 @@ This page allows user to view saved candlestick data streams. Makes use of the `
 #### layout.html 
 The page provides styling and navigation to the pages that extend it `{% extends "markets/layout.html" %}`
 #### login.html
-`login.html` provides a user interface to log in in the application using the default Django authentication model. The page makes use 
+`login.html` provides a user interface to log in the application using the default Django authentication model. The page makes use 
 of the `views.py` method `
 #### register.html
 `register.html` allows new users to register for the application.  It makes use of the `views.py` method `def register(request):`

@@ -56,7 +56,7 @@ function openWebSocket() {
         rollingAvg.push(Number(changes.c));
 
         document.querySelector("#div_buy_price_01").innerHTML = changes.c;
-
+        // Updating the feed information on the page from streaming data
         document.querySelector("#event_type").innerHTML = changes.e;
         document.querySelector("#event_time").innerHTML = changes.E;
         document.querySelector("#symbol").innerHTML = changes.s;
@@ -82,11 +82,12 @@ function openWebSocket() {
         const avg = rollingAvg.reduce((a, b) => a + b) / rollingAvg.length;
 
         document.querySelector("#div_rolling_avg_01").innerHTML = avg.toFixed((2));
+        chart_resolution = Math.abs(Number(changes.p));
 
         chart.updateOptions({
                                 yaxis: {
-                                    min: (Number(changes.c) - 5),
-                                    max: (Number(changes.c) + 5)
+                                    min: (Number(changes.c) - chart_resolution),
+                                    max: (Number(changes.c) + chart_resolution)
                                 }
                             });
         chart.updateSeries([{
