@@ -142,7 +142,7 @@ def addOrder(request):
         close = float(data["content"]["k"]["c"])
         high = float(data["content"]["k"]["h"])
         low = float(data["content"]["k"]["l"])
-        volume = float(data["content"]["k"]["l"])
+        volume = float(data["content"]["k"]["v"])
 
         try:
             product = Product.objects.get(exchange_id=exchange_id)

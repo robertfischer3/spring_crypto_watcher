@@ -3,21 +3,24 @@
 {% block body %}
     <div class="row">
         <div class="col">
+            <div><p>It should be noted that the candle chart and order book tables update from a real time feed.
+                However, the data does not flow a constant rate. Pauses may occur due to market activity pauses</p>
+            </div>
             <p> Select a exchange to track:
-                <select id="select_cryptocurrency_01" >
+                <select id="select_cryptocurrency_01">
                     <option value="ETH-USD">ETH-USD</option>
                 </select>
             </p>
         </div>
         <div class="col">
             <strong>
-            <div id="recent_average">Mean: (calculating...)</div>
-            <div id="current_variance">Variance: (calculating...)</div>
-            <div id="current_standard_deviation">Standard Deviation: (calculating...)</div>
+                <div id="recent_average">Mean: (calculating...)</div>
+                <div id="current_variance">Variance: (calculating...)</div>
+                <div id="current_standard_deviation">Standard Deviation: (calculating...)</div>
                 {% if user.is_authenticated %}
                     <div>
-                      <input type="checkbox" id="save_candle_data" name="candle_save" value="candle_save">
-                      <label for="candle_save">Save Candle Feed to Data Lake</label>
+                        <p>Save Candle Feed to Data Lake</p>
+                        <button type="button" id="save_candle_data_01" class="btn btn-primary">Save Stream</button>
                     </div>
                     <div id="batch_message_01"></div>
                     <div id="report_transaction_id_01">

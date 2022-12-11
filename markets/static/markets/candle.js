@@ -6,7 +6,13 @@ document.addEventListener('DOMContentLoaded', function () {
             batchSelector.onchange = function () {
                 const batchIdSelector = document.querySelector("#Batches_01");
                 if(batchIdSelector && batchIdSelector.value !== 'None'){
+                    // If a saved data batch has been selected, then it should be loaded
                     processData(batchIdSelector.value);
+                }
+                else{
+                    //If no batch has been selected then, the table is cleared
+                    dataSavedAnalysis = document.querySelector('#data_saved_analysis_01');
+                    dataSavedAnalysis.innerHTML = "";
                 }
 
             }
@@ -33,11 +39,14 @@ function processData(batch) {
 function createTable(patterns) {
 
     const batchSelector = document.querySelector('#Batches_01');
+    const dataSavedAnalysis = document.querySelector('#data_saved_analysis_01');
+
     if (batchSelector.childElementCount === 1)
     {
-
+        dataSavedAnalysis.innerHTML = "";
+        return false;
     }
-    dataSavedAnalysis = document.querySelector('#data_saved_analysis_01');
+
 
     if (dataSavedAnalysis === undefined) {
         alert("Error: document definition is corrupt");

@@ -51,9 +51,9 @@ document.addEventListener('DOMContentLoaded', function () {
             socket.onopen = openWebSocket;
         }
     }
-    const checkBox = document.querySelector('#save_candle_data');
-    if (checkBox) {
-        checkBox.addEventListener('click', createBatchId);
+    const streamSaveBtn = document.querySelector('#save_candle_data_01');
+    if (streamSaveBtn) {
+        streamSaveBtn.addEventListener('click', createBatchId);
     }
 
 });
@@ -100,7 +100,6 @@ function openWebSocket() {
     // from the websocket and process them
     socket.addEventListener('message', (event) => {
 
-
         const message = JSON.parse(event.data);
 
         // Kline messages come in a slow rate
@@ -108,8 +107,8 @@ function openWebSocket() {
         // arrives without a performance hit
         if (message.e === 'kline') {
             //Here we provide a mechanism to save Candle Chart History for backtesting.
-            const checkBox = document.querySelector('#save_candle_data');
-            if (checkBox && checkBox.checked) {
+            const saveStreamBtn = document.querySelector('#save_candle_data_01');
+            if (saveStreamBtn && saveStreamBtn.innerHTML === 'Cancel Stream Save') {
                 const batch_id = document.querySelector('#report_transaction_id_01');
                 message.batch_id = batch_id.innerHTML;
                 recordOrder(message);
@@ -168,18 +167,21 @@ function openWebSocket() {
 
 function createBatchId() {
     //This method creates a batch id for grouping records together for analysis
-    const checkBox = document.querySelector('#save_candle_data');
-    if (checkBox && checkBox.checked) {
+    const saveButton = document.querySelector('#save_candle_data_01');
+    if (saveButton && saveButton.innerHTML === 'Save Stream') {
+
+        saveButton.innerHTML = "Cancel Stream Save";
         let uuid = crypto.randomUUID();
         const batch_div = document.querySelector('#report_transaction_id_01');
         batch_div.innerHTML = uuid;
         const batchMsg = document.querySelector('#batch_message_01');
         batchMsg.innerHTML = "Batch Record Group ID";
-    } else if (checkBox) {
+    } else if (saveButton) {
         const batchMsg = document.querySelector('#batch_message_01');
         batchMsg.innerHTML = "";
         const batch_div = document.querySelector('#report_transaction_id_01');
         batch_div.innerHTML = "";
+        saveButton.innerHTML = "Save Stream";
     }
 }
 
@@ -224,6 +226,7 @@ function recordOrder(order) {
     /*
   This method records the incoming order message to save for later analysis
    */
+    console.log(order);
 
     fetch(`/addorder`, {
         method: 'POST',
