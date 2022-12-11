@@ -127,8 +127,8 @@ def get_initial_chart_data(request, symbol):
 
 
 @csrf_exempt
-def addOrder(request):
-    # Composing a new email must be via POST
+def add_candle(request):
+    # Saving candle feed data to database back end
     if request.method != "POST":
         return JsonResponse({"error": "POST request required."}, status=400)
 
@@ -143,13 +143,13 @@ def addOrder(request):
         high = float(data["content"]["k"]["h"])
         low = float(data["content"]["k"]["l"])
         volume = float(data["content"]["k"]["v"])
-
+        # Here we check for an instance of the Crypto currency product in the Database
         try:
             product = Product.objects.get(exchange_id=exchange_id)
         except Product.DoesNotExist:
             Product.objects.create(title=title, exchange_id=exchange_id)
             product = Product.objects.get(exchange_id=exchange_id)
-
+        # If the product exists in the database, a Candle datapoint can be added to the DB
         if product:
             Candle.objects.create(
                 batch=batch,
