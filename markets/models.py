@@ -8,7 +8,6 @@ from django.utils import timezone
 class User(AbstractUser):
     pass
 
-
 class Product(models.Model):
     """
     Product model for providing exchange names to select from web service

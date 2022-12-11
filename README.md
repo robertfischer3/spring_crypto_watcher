@@ -1,6 +1,8 @@
 # Spring Crypto Watcher
 
-The Django app, Spring Crypto Watcher makes use of Binance API rest services and websockets to
+### Executive Summary
+The Django app, Spring Crypto Watcher, makes use of Binance API rest services and websockets to display rest data and real-time streaming data from 
+Binance API websockets.
 
 This README.MD describes the Spring Crypto Watcher Final Project. 
 The project consists of these main areas:
@@ -13,18 +15,22 @@ The main goal of the project was to use websockets to obtain real-time cryptocur
 was the saving of real-time websocket streaming data to a database backend for later analysis.  Of the three main application pages, 
 `index.html` displays a realtime candle data feed and order book information from the Binance API (https://api.binance.us). 
 `analytics.html` displays real-time 24 hour ticker data and `candle.html` provides for the retrieval of 
-saved candle data streams and analyzes the data for recognizable candle chart patterns.
+saved candle data streams and analyzes the data for recognizable candlestick chart patterns. The `index.html` and the `candle.html` files are
+designed to work together.  The `index.html` shows candlestick data from an exchange. If the user is logged into the Spring Crypto Watcher
+application with the Django authentication model, then the user can save candlestick streaming data under a batch id (UUID)
+The `candle.html` fill allows the user to pull back the saved batch stream data to view it. In doing so, the user also receives
+and analysis of the data where the data is processed for candlestick pattern recognition. 
 
 ### Websocket Design
 The focus of this application is the use of websockets for real-time data feeds. Originally the project design included the use of 
 Django channels which can create websockets.  However, there was no data that needed to be streamed
-from Django. Websockets are , in general are designed to open a connection once and stay open with a client application.  In this way, 
-real-time applications are supportable because the expensive nature of connecting between two machines. Service connections
-require setup and tear downtime for each new connection.  Websockets connect once and stay open with the client. 
+from the Django application. Websockets are , in general are designed to open a connection once and stay open with a client application.  In this way, 
+real-time applications are supportable because the expensive nature of connecting between two machines is avoided. Service connections
+require setup and teardown time for each new connection.  Websockets connect once and stay open with the client. 
 
-In general, the spring_crypto_watcher creates a websocket connection from a javascript file since setting the Django portion of the application
-would mean create asynchronous server side code, and employ Django channels for the mere purpose of rebroadcasting the websocket streaming for
-the Binance API (https://api.binance.us). Setting up the Django asynchronous, websocket streaming from the Binance API only reduces 
+In general, the spring_crypto_watcher creates a websocket connection from a javascript file since setting up the Django application
+would mean the creation asynchronous server side code, and employ Django channels for the mere purpose of rebroadcasting the websocket streaming from
+the Binance API (https://api.binance.us). Setting up Django asynchronous, websocket streaming from the Binance API only reduces 
 performance and adds unnecessary complexity to an otherwise simple implementation. 
 
 The following is an example of how simple it is to connect to a websocket using Javascript:
@@ -37,7 +43,7 @@ The following is an example of how simple it is to connect to a websocket using 
 
 ### Getting Started
 Getting started is fairly simple.  One of the main reasons for the choice of the Binance API is that
-the services can be used without requiring a Binance API account. Originally, the Coinbase API (coinbase.com) was selected. However
+the services can be used without requiring a Binance API account. Originally, the Coinbase API (coinbase.com) was selected. However,
 the Coinbase API required account registration. Binance offered a better, more straightforward approach to 
 accessing web services and websockets with anonymous use. 
 
@@ -45,6 +51,10 @@ accessing web services and websockets with anonymous use.
 **Install Django, if not done already:**
 
 `pip install django`
+## Files created for the application
+In addition to the default files created by Django when running
+`django-admin startproject spring_crypto_watcher`. The following files were created or modifies by the developer
+to enable the project
 
 **Create the database and database model**
 
@@ -62,15 +72,11 @@ accessing web services and websockets with anonymous use.
 
 Run `python manage.py createsuperuser`, input your email, password and username
 
-## Files created for the application
-In addition to the default files created by Django when running
-`django-admin startproject spring_crypto_watcher`. The following files were created or modifies by the developer
-to enable the project
 
 ### Python Files
 
 #### views.py
-Views (views.py) forms the core switchboard for multiple services.  The first is three are application views
+The `views.py` file forms the core switchboard for multiple application services.  The first are application views
 `Index(View)`, `Analytics(View)`, and `Candle(View)`. In addition, there are several services that have been created that are called from Javascript clients. They are:
 - get_candle_patterns(request, batch):
 - get_ticker(request, symbol):
@@ -78,25 +84,25 @@ Views (views.py) forms the core switchboard for multiple services.  The first is
 - get_candle_data(url, symbol, interval="1m"):
 - get_products_sublist(request):
 
-The above item are mostly used to retrieve information.  Some services could have been completely implemented on the client side.  However, placing 
-these services on the server side allows for future processing changes. For example:
+The above service items are mostly used to retrieve information. Only one service supports a PUT operation. Some services could have been completely implemented on the client side.  However, placing 
+these services on the server side allows for future processing changes.
 
 ##### Index(View)
 `Index(View)` class allows the user to watch a particular cryptocurrency by selecting from a drop-down at the top of the page. 
-The drop-down is pulled from the Binance APIs (https://api.binance.us). In addition, the page connects to a websocket. 
+The drop-down information is pulled from the Binance APIs (https://api.binance.us) and has been truncated to ten items. In addition, the page connects to a websocket. 
 The websocket is opened and subscribes to multiple feeds on the client side. Additionally, the page includes the ability for signed-in users
-to save streaming candlestick data to a database. The page hosts a candlestick chart for the selected cryptocurrency as well as real-time 
+to save streaming candlestick data to a database (via the Save Stream button). The page hosts a candlestick chart for the selected cryptocurrency as well as a real-time 
 order book of ask and buy actions in the market
 
 ##### Analytics(View)
 `Analytics(View)` class allows users to watch 24 hour ticker data for a selected currency. The drop-down changes the streaming feed.
-This page demonstrates the ability to track realtime data.  The chart on the page shows the last 50 data points receive
+This page demonstrates the ability to track realtime data.  The chart on the page shows the last 50 data points received
 ##### Candle(View)
 The `Candle(View)` class allows user to reload saved candlestick price data and have it run through a simple candlestick pattern recognition set of 
 algorithms.
 
 #### urls.py
-The `urls.py` code sets up the routing for pages and services that support the application.  As we can see in the files both view and 
+The `urls.py` code sets up the routing for pages and services that support the application.  As we can see in the file both views and 
 services are provided. The services are generally designed to be used by Javascript code running on the client. 
 ```python
 app_name = "markets"
@@ -118,12 +124,50 @@ urlpatterns = [
 ```
 Methods, such as `path("ticker/<str:symbol>", views.get_ticker, name="ticker")`, are utilized by the client side Javascript code.  
 #### models.py 
+The `models.py` file is relatively straight forward.  There are only the following models:
+- Product: this model captures exchange product titles and their exchange_id. 
+- User: the User model inherits from the `AbstractUser` class and is fairly straight forward. 
+- Candle: the Candle model has the following definition:
+```python
+class Candle(models.Model):
+    """
+    Candle model for storing historical price information
+    """
+
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="products"
+    )
+    open = models.FloatField(default=float(0))
+    high = models.FloatField(default=float(0))
+    low = models.FloatField(default=float(0))
+    close = models.FloatField(default=float(0))
+    volume = models.FloatField(default=float(0))
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="users")
+    batch = models.CharField(max_length=36, default="")
+    created = models.DateTimeField(default=datetime.now)
+
+    class Meta:
+        verbose_name = "candle"
+        verbose_name_plural = "candles"
+
+    def __str__(self):
+        return f"Candle {self.created} with id {self.id}"
+```
+The Candle model is designed to capture websocket candlestick streaming data from the `index.js` script. It is submitted to the Django 
+service method, `add_candle(request):` found in the `views.py` file. The batch column is a UUID that is generated at the time of the
+streaming recording being enabled and could allow for transaction playback for algorithm testing. 
+
+The batch id is not very informative to the user.  However, creating a metadata model class to provide a human-readable name and other
+useful data about the streaming session would have added even more complexity to an already complex project. From the Final Project proposal, 
+> "Optionally, the project may record the prices in the project database with a record button."
+
+A more sophisticated model could have been created, but that will have to wait for the next version. 
 #### japanesecandles.py
 The `japanesecandles.py` file is simplified algorithms used for looking at candle data and determining if there are
 recognizable patterns that code be used for automated trading. In production applications, a more robust library such as 
-[TA Lib](https://pypi.org/project/TA-Lib/). The TA Lib library has sophisticated candlestick pattern recognition but relies on having 
+[TA Lib](https://pypi.org/project/TA-Lib/) would be implemented. The TA Lib library has sophisticated candlestick pattern recognition but relies on having 
 Cython available.  The goal here was to avoid requiring a potentially complex implementation for the grader, so a simplified 
-pattern recongnition library was developed in `japanesecandles.py` instead
+pattern recognition library was developed in `japanesecandles.py` instead
 ### HTML Files
 The templates/markets directory contains the following:
 #### index.html
@@ -134,12 +178,18 @@ to real time streaming services at Binance.
 
 **Note**
 CSS Style code exists on the index.html page. This code was original located in `style.css`, but the animations failed to execute.
-The decision to move the code into `index.html` is a temporary one until the bug is dicovered.
+The decision to move the code into `index.html` is a temporary one until the bug is discovered.
 #### analytics.html
+This page displays 24 hour ticker data for a selected cryptocurrency exchange
 #### candle.html
+This page allows user to view saved candlestick data streams. Makes use of the `views.py` methods `def get_candle_patterns(request, batch):`
 #### layout.html 
+The page provides styling and navigation to the pages that extend it `{% extends "markets/layout.html" %}`
 #### login.html
+`login.html` provides a user interface to log in in the application using the default Django authentication model. The page makes use 
+of the `views.py` method `
 #### register.html
+`register.html` allows new users to register for the application.  It makes use of the `views.py` method `def register(request):`
 ### Javascript Files
 #### index.js
 The `index.js` file contains code to connect to a Binance API websocket instance and sets up subscriptions with the websocket to be able
@@ -150,7 +200,7 @@ to receive selected Binance market messages. The websocket setup code looks like
             socket.onopen = openWebSocket;
         }
 ```
-As seen above once the socket has been opened.  A call is made to the `openWebSocket` javascript function. The `openWebSocket`
+As seen above once the socket has been opened, a call is made to the `openWebSocket` javascript function. The `openWebSocket`
 function then subscribes to several Binance websocket feeds. Notice that exchange being followed is determined by an exchange symbol:
 ```javascript
 
@@ -252,12 +302,15 @@ The main websocket message that is being subscribed is delivered the following j
 **Note**
 The chart on the `analytics.html` requires code to focus the chart to a meaningful range. For example, 
 BTCUSD (Bitcoin in USD ($)) was trading the $17K range. Without code to set a meaningful focus range
-the chart can update in real time, looks like a flat line even changes in the displayed price data occur every second. As a result
+the chart updates looks like a flat line even changes in the displayed price data occur every second. As a result
 the chart boundaries are focused at plus or minus five units around the last price.  In the event of a dramatic price change
 the chart may not show the previous changes because the minimum and maximum y-axis boundaries are too narrow. However, normal 
-trading activity is general kept in small ranges.  Hence 
+trading activity is general kept in small ranges.  A future enhancement to application would to find a more accurate chart resolution algorithm 
 
 #### candle.js
 `candle.js` supports the activities on candle.html. `candle.js` goes and finds all candle streaming data batches and allows the user to select
-a user created batch.  The following Javascript code in `candle.js` pulls forward the saved candlestick data from `views.py` method, and searches for candlestick
+a user created batch.  The following Javascript code in `candle.js` pulls forward the saved candlestick data from `views.py` method, and searches for candlestick patterns by 
+invoking `df = find_japanese_patterns(candles)`. This server side processing makes sense from a performance perspective. The service that 
+`candle.js` calls employ simple algorithms.  However, would not necessarily be the case in production. In production the streaming datasets would likely be 
+larger and employ more sophisticated algorithms. Hence, it made sense to process the saved streaming data on the server side code.
 

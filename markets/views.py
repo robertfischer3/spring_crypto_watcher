@@ -161,7 +161,7 @@ def add_candle(request):
                 volume=volume,
                 user_id=request.user.id,
             )
-
+    # Send response back to application
     return JsonResponse({"message": "kline added successfully."}, status=201)
 
 
@@ -194,6 +194,7 @@ def get_products_sublist(request):
         exchange_content = json.loads(exhang_info.content)
         symbols = exchange_content.get("symbols")
         # Here we are only interested in a subset of products
+        # Therefore we limit the number of records
         for symbol in symbols[0:10]:
             symbol_code = symbol.get("symbol")
             symbol_dict[symbol_code] = symbol_code
