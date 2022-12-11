@@ -1,5 +1,5 @@
 let socket;
-let data = [0];
+let data = [];
 let chart;
 let rollingAvg=[0];
 let symbol = "BTCUSD";
@@ -9,11 +9,12 @@ let WEBSOCKET_URL = 'wss://stream.binance.us:9443/ws';
 
 document.addEventListener('DOMContentLoaded', function () {
 
+    // Create real-time chart to track moving price data
     chart = new ApexCharts(document.querySelector("#chart"), initializeChart());
     chart.render();
 
     const exchangeSelector = document.querySelector('#select_cryptocurrency_01');
-
+    // Load currency selector list
     if (exchangeSelector) {
         //This method call load the select dropdown
         loadSelect(exchangeSelector);
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // This call initiates a connection to a websocket
             onChangeCurrency(symbolSelector.value);
         };
+        // If a socket hasn't been opened, open one.
         if (socket === undefined) {
             socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@ticker`);
             socket.onopen = openWebSocket;
@@ -39,9 +41,10 @@ function openWebSocket() {
     const subscribe = subscribeToWebSocket(symbol);
     socket.send(subscribe);
 
+    // Add an event listener to listen for socket events
     socket.addEventListener('message', (event) => {
         //Grab feed data and convert to JSON
-        changes = JSON.parse(event.data);
+        const changes = JSON.parse(event.data);
         if (data.length > 50) {
             data.shift();
         }
@@ -50,6 +53,7 @@ function openWebSocket() {
         }
         if (changes.c !==undefined){
             data.push(changes.c);
+
         }
 
         //Calculating a rolling average
@@ -58,9 +62,9 @@ function openWebSocket() {
         document.querySelector("#div_buy_price_01").innerHTML = changes.c;
         // Updating the feed information on the page from streaming data
         document.querySelector("#event_type").innerHTML = changes.e;
-        document.querySelector("#event_time").innerHTML = changes.E;
+        document.querySelector("#event_time").innerHTML = new Date(changes.E).toLocaleTimeString();
         document.querySelector("#symbol").innerHTML = changes.s;
-        document.querySelector("#price_change").innerHTML = changes.p
+        document.querySelector("#price_change").innerHTML = changes.p;
         document.querySelector("#price_change_percent").innerHTML = changes.P;
         document.querySelector("#weighted_average_price").innerHTML = changes.w;
         document.querySelector("#first_trade").innerHTML = changes.x;
@@ -75,14 +79,19 @@ function openWebSocket() {
         document.querySelector("#low_price").innerHTML = changes.l;
         document.querySelector("#total_base_asset_volume").innerHTML = changes.v;
         document.querySelector("#total_traded_quote_asset_volume").innerHTML = changes.q;
-        document.querySelector("#statistics_open_time").innerHTML = changes.O;
-        document.querySelector("#statistics_close_time").innerHTML = changes.C;
+        document.querySelector("#statistics_open_time").innerHTML = new Date(changes.O).toLocaleTimeString();
+        document.querySelector("#statistics_close_time").innerHTML = new Date(changes.C).toLocaleTimeString();
         document.querySelector("#total_number_of_trades").innerHTML = changes.n;
 
         const avg = rollingAvg.reduce((a, b) => a + b) / rollingAvg.length;
 
-        document.querySelector("#div_rolling_avg_01").innerHTML = avg.toFixed((2));
-        chart_resolution = Math.abs(Number(changes.p));
+        if (isNaN(avg)){
+             document.querySelector("#div_rolling_avg_01").innerHTML = "Calculating...";
+        }
+        else {
+            document.querySelector("#div_rolling_avg_01").innerHTML = avg.toFixed((2));
+        }
+        const chart_resolution = Math.abs(Number(changes.p));
 
         chart.updateOptions({
                                 yaxis: {
@@ -92,7 +101,7 @@ function openWebSocket() {
                             });
         chart.updateSeries([{
             data: data
-        }])
+        }]);
     });
 
 }
@@ -104,7 +113,14 @@ function onChangeCurrency(symbolSelected) {
         socket.close();
     }
     symbol = symbolSelected;
-    document.querySelector("span").innerHTML;
+    data.length = 0
+    chart.updateSeries([{
+            data: data
+        }]);
+    //Open new websocket for updated symbol query
+    socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
+    // Handle to websocket open event
+    socket.onopen = openWebSocket;
 }
 
 function unsubscribeWebSocket(symbol) {

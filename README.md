@@ -167,7 +167,7 @@ The `japanesecandles.py` file is simplified algorithms used for looking at candl
 recognizable patterns that code be used for automated trading. In production applications, a more robust library such as 
 [TA Lib](https://pypi.org/project/TA-Lib/) would be implemented. The TA Lib library has sophisticated candlestick pattern recognition but relies on having 
 Cython available.  The goal here was to avoid requiring a potentially complex implementation for the grader, so a simplified 
-pattern recognition library was developed in `japanesecandles.py` instead
+pattern recognition library was utilized in `japanesecandles.py` instead.
 ### HTML Files
 The templates/markets directory contains the following:
 #### index.html
@@ -177,14 +177,16 @@ ticker data requires a page refresh.  The price candle chart and order book info
 to real time streaming services at Binance.
 
 **Note**
-CSS Style code exists on the index.html page. This code was original located in `style.css`, but the animations failed to execute.
+CSS Style code exists on the index.html page. This code was originally located in `style.css`, but the animations failed to execute.
 The decision to move the code into `index.html` is a temporary one until the bug is discovered.
 #### analytics.html
-This page displays 24 hour ticker data for a selected cryptocurrency exchange
+This page displays 24 hour ticker data for a selected cryptocurrency exchange. The file contains HTML and references Javascript.
 #### candle.html
-This page allows user to view saved candlestick data streams. Makes use of the `views.py` methods `def get_candle_patterns(request, batch):`
+This page allows user to view saved candlestick data streams. Makes use of the `views.py` methods `def get_candle_patterns(request, batch):`. 
+The file contains HTML and references Javascript.
 #### layout.html 
-The page provides styling and navigation to the pages that extend it `{% extends "markets/layout.html" %}`
+The page provides styling and navigation to the pages that extend it `{% extends "markets/layout.html" %}`. The file contains 
+HTML, Django template tags, and references Javascript
 #### login.html
 `login.html` provides a user interface to log in the application using the default Django authentication model. The page makes use 
 of the `views.py` method `

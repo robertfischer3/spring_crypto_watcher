@@ -1,38 +1,40 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-    const batchSelector = document.querySelector('#Batches_01')
+    //First we want to load all the batches created by the user
+    const batchSelector = document.querySelector('#Batches_01');
     if (batchSelector) {
-        if (batchSelector.childElementCount > 1){
+        if (batchSelector.childElementCount > 1) {
             batchSelector.onchange = function () {
                 //Grab the batch id drop down
                 const batchIdSelector = document.querySelector("#Batches_01");
-                if(batchIdSelector && batchIdSelector.value !== 'None'){
+                if (batchIdSelector && batchIdSelector.value !== 'None') {
                     // If a saved data batch has been selected, then it should be loaded
                     processData(batchIdSelector.value);
-                }
-                else{
+                } else {
                     //If no batch has been selected then, the table is cleared
-                    dataSavedAnalysis = document.querySelector('#data_saved_analysis_01');
+                    const dataSavedAnalysis = document.querySelector('#data_saved_analysis_01');
                     dataSavedAnalysis.innerHTML = "";
                 }
 
-            }
+            };
         }
     }
 
 });
 
 function processData(batch) {
-//Pull back batch data from analysis
+    // This method while it pulls back batch data,
+    // it also does rudimentary candlestick recognition
+    //Pull back batch data from analysis
     fetch(`patterns/${batch}`)
         .then(response => {
             if (response.ok) {
-                return response.json()
+                return response.json();
             }
             return Promise.reject(response);
         })
         .then(entry => {
-            patterns = JSON.parse(entry.patterns);
+            const patterns = JSON.parse(entry.patterns);
             //Create a table to display the response
             createTable(patterns);
         });
@@ -45,8 +47,7 @@ function createTable(patterns) {
     const batchSelector = document.querySelector('#Batches_01');
     const dataSavedAnalysis = document.querySelector('#data_saved_analysis_01');
 
-    if (batchSelector.childElementCount === 1)
-    {
+    if (batchSelector.childElementCount === 1) {
         dataSavedAnalysis.innerHTML = "";
         return false;
     }
@@ -64,8 +65,8 @@ function createTable(patterns) {
             //Create table row
             let tr = document.createElement('tr');
 
-            columns = [];
-            for (let i = 0; i < 16; i++){
+            let columns = [];
+            for (let i = 0; i < 16; i++) {
                 // Layout columns
                 columns.push(document.createElement('td'));
             }
@@ -93,9 +94,9 @@ function createTable(patterns) {
 
             // Set the currency low price
             let lowCol = document.createTextNode(obj.low);
-             columns[5].appendChild(lowCol);
+            columns[5].appendChild(lowCol);
 
-             // Set the currency close price
+            // Set the currency close price
             let closeCol = document.createTextNode(obj.close);
             columns[6].appendChild(closeCol);
 
@@ -104,41 +105,44 @@ function createTable(patterns) {
             columns[7].appendChild(volumeCol);
 
             // Mark X if bullish swing is found in data
-            let bullishswingCol = document.createTextNode(((obj.bullishswing) ? 'X': ''));
+            let bullishswingCol = document.createTextNode(((obj.bullishswing) ? 'X' : ''));
             columns[8].appendChild(bullishswingCol);
 
             // Mark X if bearish swing is found in data
-            let bearishswingCol = document.createTextNode(((obj.bearishswing) ? 'X': ''));
-             columns[9].appendChild(bearishswingCol);
+            let bearishswingCol = document.createTextNode(((obj.bearishswing) ? 'X' : ''));
+            columns[9].appendChild(bearishswingCol);
 
-             // Mark X if bullish pinbar is found in data
-            let bullishpinbarCol = document.createTextNode(((obj.bullishpinbar) ? 'X': ''));
+            // Mark X if bullish pinbar is found in data
+            let bullishpinbarCol = document.createTextNode(((obj.bullishpinbar) ? 'X' : ''));
             columns[10].appendChild(bullishpinbarCol);
 
             // Mark X if bearish pinbar is found in data
-            let bearishpinbarCol = document.createTextNode(((obj.bearishpinbar) ? 'X': ''));
+            let bearishpinbarCol = document.createTextNode(((obj.bearishpinbar) ? 'X' : ''));
             columns[11].appendChild(bearishpinbarCol);
 
             // Mark X if inside bar is found in data
-            let insidebarCol = document.createTextNode(((obj.insidebar) ? 'X': ''));
+            let insidebarCol = document.createTextNode(((obj.insidebar) ? 'X' : ''));
             columns[12].appendChild(insidebarCol);
 
             // Mark X if outside bar is found in data
-            let outsidebarCol = document.createTextNode(((obj.outsidebar) ? 'X': ''));
-             columns[13].appendChild(outsidebarCol);
+            let outsidebarCol = document.createTextNode(((obj.outsidebar) ? 'X' : ''));
+            columns[13].appendChild(outsidebarCol);
 
-             // Mark X if bullish engulfing is found in data
-            let bullishengulfingCol = document.createTextNode(((obj.bullishengulfing) ? 'X': ''));
+            // Mark X if bullish engulfing is found in data
+            let bullishengulfingCol = document.createTextNode(((obj.bullishengulfing) ? 'X' : ''));
             columns[14].appendChild(bullishengulfingCol);
 
             // Mark X if bearish engulfing is found in data
-            let bearishengulfingCol = document.createTextNode(((obj.bearishengulfing) ? 'X': ''));
+            let bearishengulfingCol = document.createTextNode(((obj.bearishengulfing) ? 'X' : ''));
             columns[15].appendChild(bearishengulfingCol);
 
-            for (let i = 0; i < 16; i++){
+            for (let i = 0; i < 16; i++) {
                 tr.appendChild(columns[i]);
             }
-
+            if (obj.bullishswing || obj.bearishswing || obj.bullishpinbar || obj.bearishpinbar ||
+                obj.insidebar || obj.outsidebar || obj.bullishengulfing || obj.bearishengulfing) {
+                tr.setAttribute('class', 'table-success');
+            }
             dataSavedAnalysis.appendChild(tr);
         }
     }
