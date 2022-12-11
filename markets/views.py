@@ -44,7 +44,7 @@ class CandleView(View):
     def get(self, request):
         # Authenticated users view their saved candle data
         if request.user.is_authenticated:
-            user_batches = Candle.objects.filter(user_id=request.user).values_list('user_id', flat=True).distinct()
+            user_batches = Candle.objects.filter(user_id=request.user).values_list('batch', flat=True).distinct()
             context = {"user_batches": user_batches}
             return render(request, "markets/candle.html", context=context)
 

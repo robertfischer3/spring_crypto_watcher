@@ -5,11 +5,13 @@
     <div id="analysis_table_01" class="container table-responsive p-3 my-3 border">
         <div class="row">
             <div class="col">
-                <select name="Batches_01" size="1">
-                    {% for batch in user_batches %}
-                         <option value="{{ batch }}"> Merceders </option>
-                    {%  endfor %}
-                </select>
+                {% if user_batches.count > 0 %}
+                    <select name="Batches_01" size="1">
+                        {% for batch_id in user_batches %}
+                            <option value="{{ batch_id }}">{{ batch_id }}</option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
             </div>
             <div class="col">
                 <br>

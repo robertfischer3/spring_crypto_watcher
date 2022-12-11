@@ -241,7 +241,7 @@ function recordOrder(order) {
             return Promise.reject(response);
         })
         .catch((response) => {
-             console.log(response);
+            console.log(response);
         });
 }
 
@@ -298,7 +298,7 @@ function onChangeCurrency(symbolSelected) {
     //Clear out Order Tables on screen
     askTableBody = document.querySelector('#ask_table_body_01');
     askTableBody.innerHTML = "";
-     //Clear out Order Tables on screen
+    //Clear out Order Tables on screen
     bidTableBody = document.querySelector('#bid_table_body_01');
     bidTableBody.innerHTML = "";
 
@@ -369,6 +369,7 @@ function processOrderBook(orderBookRow) {
     bidOrders.sort((a, b) => b.b - a.b);
     askOrders.sort((a, b) => b.a - a.a);
 
+    //Filter out undefined records
     askOrders = askOrders.filter(function (value) {
         return value !== undefined;
     });
@@ -383,6 +384,7 @@ function processOrderBook(orderBookRow) {
     if (askOrders.length > 10) {
         askOrders.length = 10;
     }
+    // Process rows to
     renderAskOrderRow(askOrders);
     renderBidOrderRow(bidOrders);
 }
@@ -396,6 +398,7 @@ const findVariance = (recordsArray = []) => {
     // Sum all the values in the array
     const sum = recordsArray.reduce((acc, val) => acc + val);
     const {length: num} = recordsArray;
+    // Find the median value
     const median = sum / num;
     let variance = 0;
     recordsArray.forEach(num => {
@@ -408,6 +411,7 @@ const findVariance = (recordsArray = []) => {
 function populateTable(jsonData) {
     //Populate data in 24 hour ticker table
     ticker_table = document.querySelector('#table_body_01');
+    //Reset the ticker table
     ticker_table.innerHTML = "";
     //Check if table is in the document
     if (ticker_table) {
@@ -419,9 +423,13 @@ function populateTable(jsonData) {
             const tableRow = document.createElement('tr');
             const tableColKey = document.createElement('td');
             const tableColData = document.createElement('td');
+            //Split on Capital Letters to dynamically build the data label
             tableColKey.innerHTML = splitOnCapitals(key);
+            //Display the data value
             tableColData.innerHTML = jsonData[key];
+            // Add columns to table row
             tableRow.append(tableColKey, tableColData);
+            //Append the row to the table
             ticker_table.append(tableRow)
 
         }
@@ -431,6 +439,7 @@ function populateTable(jsonData) {
 
 function renderBidOrderRow(bidOrders) {
 
+    //This method is used to build the dynamic bid order book rows
     bidTableBody = document.querySelector('#bid_table_body_01');
     bidTableBody.innerHTML = "";
 
@@ -455,12 +464,15 @@ function renderBidOrderRow(bidOrders) {
 }
 
 function renderAskOrderRow(askOrders) {
+    //This method is used to build the dynamic ask order book rows
     askTableBody = document.querySelector('#ask_table_body_01');
+    //Reset the control
     askTableBody.innerHTML = "";
     askOrders.forEach((entry, index) => {
         if (entry.s) {
 
             const tableRow = document.createElement('tr');
+            //Class used for fade animation
             tableRow.setAttribute("class", "new_row_fade_02")
             const tableRowSymbol = document.createElement('td');
             const tableColKey = document.createElement('td');
@@ -477,6 +489,7 @@ function renderAskOrderRow(askOrders) {
 }
 
 function unsubscribeWebSocket(symbol, interval = '1m') {
+    //This method is used to gracefully disconnect a websocket
     return JSON.stringify({
         "method": "UNSUBSCRIBE",
         "params":
@@ -492,6 +505,8 @@ function unsubscribeWebSocket(symbol, interval = '1m') {
 
 
 function subscribeToWebSocket(symbol, interval = '1m') {
+    // This method is used to connect to a websocket and subscribe
+    // to various feeds on a single web socket connect
     return JSON.stringify(// Request
         {
             "method": "SUBSCRIBE",

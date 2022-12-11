@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const batchSelector = document.querySelector('#Batches_01')
     if (batchSelector) {
-        //This method call load the select dropdown
-        loadSelect(batchSelector);
+        if (batchSelector.childElementCount > 0){
+
+        }
     }
 
 });
