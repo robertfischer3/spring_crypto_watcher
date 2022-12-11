@@ -40,7 +40,7 @@ function openWebSocket() {
     socket.send(subscribe);
 
     socket.addEventListener('message', (event) => {
-        console.log('Message from server ', event.data);
+        //Grab feed data and convert to JSON
         changes = JSON.parse(event.data);
         if (data.length > 50) {
             data.shift();
@@ -48,7 +48,11 @@ function openWebSocket() {
         if (rollingAvg.length > 10) {
             rollingAvg.shift();
         }
-        data.push(changes.c);
+        if (changes.c !==undefined){
+            data.push(changes.c);
+        }
+
+        //Calculating a rolling average
         rollingAvg.push(Number(changes.c));
 
         document.querySelector("#div_buy_price_01").innerHTML = changes.c;
@@ -79,6 +83,12 @@ function openWebSocket() {
 
         document.querySelector("#div_rolling_avg_01").innerHTML = avg.toFixed((2));
 
+        chart.updateOptions({
+                                yaxis: {
+                                    min: (Number(changes.c) - 5),
+                                    max: (Number(changes.c) + 5)
+                                }
+                            });
         chart.updateSeries([{
             data: data
         }])
