@@ -1,7 +1,8 @@
 let socket;
 let data = [];
 let chart;
-let rollingAvg=[0];
+let rollingAvg=[];
+
 let symbol = "BTCUSD";
 
 // Web Socket Address
@@ -33,8 +34,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-
 function openWebSocket() {
+// This method handles the websocket open event
 
     // Here we are subscribing to sever messages on the open
     // web socket
@@ -45,21 +46,20 @@ function openWebSocket() {
     socket.addEventListener('message', (event) => {
         //Grab feed data and convert to JSON
         const changes = JSON.parse(event.data);
-        if (data.length > 50) {
+        if (data.length >= 25) {
             data.shift();
         }
-        if (rollingAvg.length > 10) {
+        if (rollingAvg.length >= 10) {
             rollingAvg.shift();
         }
         if (changes.c !==undefined){
-            data.push(changes.c);
-
+            data.push([changes.E, changes.c]);
         }
 
         //Calculating a rolling average
         rollingAvg.push(Number(changes.c));
 
-        document.querySelector("#div_buy_price_01").innerHTML = changes.c;
+        document.querySelector("#div_buy_price_01").innerHTML = Number(changes.c).toFixed(2);
         // Updating the feed information on the page from streaming data
         document.querySelector("#event_type").innerHTML = changes.e;
         document.querySelector("#event_time").innerHTML = new Date(changes.E).toLocaleTimeString();
@@ -92,13 +92,15 @@ function openWebSocket() {
             document.querySelector("#div_rolling_avg_01").innerHTML = avg.toFixed((2));
         }
         const chart_resolution = Math.abs(Number(changes.p));
-
+        // The following sets the chart resolution based on recent price changes
         chart.updateOptions({
                                 yaxis: {
                                     min: (Number(changes.c) - chart_resolution),
                                     max: (Number(changes.c) + chart_resolution)
                                 }
                             });
+
+        // Updates the series data that forms the chart line
         chart.updateSeries([{
             data: data
         }]);
@@ -113,6 +115,7 @@ function onChangeCurrency(symbolSelected) {
         socket.close();
     }
     symbol = symbolSelected;
+    // Clear chart information
     data.length = 0
     chart.updateSeries([{
             data: data
@@ -134,8 +137,6 @@ function unsubscribeWebSocket(symbol) {
         "id": 1
     });
 }
-
-
 
 function subscribeToWebSocket(symbol) {
     // This method is used to connect to a websocket and subscribe
@@ -207,6 +208,9 @@ function initializeChart() {
         title: {
             text: 'Market Updating Chart',
             align: 'center'
+        },
+        xaxis: {
+          type: 'datetime',
         },
         markers: {
             size: 0

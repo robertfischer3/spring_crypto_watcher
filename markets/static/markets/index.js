@@ -138,6 +138,7 @@ function openWebSocket() {
             //Update the statistics
             updateStatistics(records);
 
+            // Grab a reference to the chart
             let chartDiv = document.querySelector("#chart");
 
             if (chartDiv) {
@@ -291,6 +292,7 @@ function onChangeCurrency(symbolSelected) {
     getCandleRecords(symbolSelected);
     // Retrieve new ticker records
     get24hrTicker(symbolSelected);
+
     // We load the charts with initial data
     //loadCandleChartData(jsonObjects, records, line);
     symbol = symbolSelected;
@@ -304,6 +306,19 @@ function onChangeCurrency(symbolSelected) {
     //Clear out Order Tables on screen
     const bidTableBody = document.querySelector('#bid_table_body_01');
     bidTableBody.innerHTML = "";
+
+    let chartDiv = document.querySelector("#chart");
+    if (chartDiv) {
+    chart.updateSeries([{
+        name: 'line',
+        type: 'line',
+        data: line
+    }, {
+        name: 'candle',
+        type: 'candlestick',
+        data: records
+    }]);
+}
 
     //Open new websocket for updated symbole query
     socket = new WebSocket(`${WEBSOCKET_URL}/${symbol}@bookTicker`);
