@@ -112,7 +112,7 @@ function openWebSocket() {
             if (saveStreamBtn && saveStreamBtn.innerHTML === 'Cancel Stream Save') {
                 const batch_id = document.querySelector('#report_transaction_id_01');
                 message.batch_id = batch_id.innerHTML;
-                recordOrder(message);
+                recordCandle(message);
             }
             let updateRecord = [];
             if (records.length % 50 === 0) {
@@ -224,16 +224,21 @@ function get24hrTicker(symbol) {
         });
 }
 
-function recordOrder(order) {
+function recordCandle(candle) {
     /*
   This method records the incoming order message to save for later analysis
    */
-    console.log(order);
+
+    // Grab CRSF token to pass CRSF checks Server side
+    const token = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 
     fetch(`/addorder`, {
         method: 'POST',
+        headers: {
+            "X-CSRFToken": token
+        },
         body: JSON.stringify({
-            content: order
+            content: candle
         })
     })
         .then((response) => {

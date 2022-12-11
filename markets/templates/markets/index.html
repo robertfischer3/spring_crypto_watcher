@@ -1,6 +1,7 @@
 {% extends "markets/layout.html" %}
 {% load static %}
 {% block body %}
+    {% csrf_token %}
     <div class="row">
         <div class="col">
             <div><p>It should be noted that the candle chart and order book tables update from a real time feed.

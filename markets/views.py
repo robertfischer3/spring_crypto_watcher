@@ -6,7 +6,8 @@ from django.http import (
     HttpResponse,
 )
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
 from django.urls import reverse
 from django.db import IntegrityError
 from markets.models import User
@@ -126,7 +127,8 @@ def get_initial_chart_data(request, symbol):
         return JsonResponse(candle_dict)
 
 
-@csrf_exempt
+
+@login_required
 def add_candle(request):
     # Saving candle feed data to database back end
     if request.method != "POST":
