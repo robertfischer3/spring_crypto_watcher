@@ -78,11 +78,11 @@ Run `python manage.py createsuperuser`, input your email, password and username
 #### views.py
 The `views.py` file forms the core switchboard for multiple application services.  The first are application views
 `Index(View)`, `Analytics(View)`, and `Candle(View)`. In addition, there are several services that have been created that are called from Javascript clients. They are:
-- get_candle_patterns(request, batch):
-- get_ticker(request, symbol):
-- def add_candle(request):
-- get_candle_data(url, symbol, interval="1m"):
-- get_products_sublist(request):
+- **get_candle_patterns(request, batch)**, retrieves stored candlestick data and processes rows looking for know patterns
+- **get_ticker(request, symbol)**: makes a simple request to Binance to retrieve ticker information
+- **add_candle(request)**: supports a PUT operation to store candlestick data fed by a websocket stream
+- **get_candle_data(url, symbol, interval="1m")**: retrieves data for initializing a view
+- **get_products_sublist(request)**: pulls back a limited product list from Binance
 
 The above service items are mostly used to retrieve information. Only one service supports a PUT operation. Some services could have been completely implemented on the client side.  However, placing 
 these services on the server side allows for future processing changes.
@@ -163,7 +163,7 @@ useful data about the streaming session would have added even more complexity to
 
 A more sophisticated model could have been created, but that will have to wait for the next version. 
 #### japanesecandles.py
-The `japanesecandles.py` file is simplified algorithms used for looking at candle data and determining if there are
+The `japanesecandles.py` file contains simplified algorithms used for looking at candlestick data and determining to determine if there are
 recognizable patterns that code be used for automated trading. In production applications, a more robust library such as 
 [TA Lib](https://pypi.org/project/TA-Lib/) would be implemented. The TA Lib library has sophisticated candlestick pattern recognition but relies on having 
 Cython available.  The goal here was to avoid requiring a potentially complex implementation for the grader, so a simplified 
