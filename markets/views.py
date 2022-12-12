@@ -127,7 +127,6 @@ def get_initial_chart_data(request, symbol):
         return JsonResponse(candle_dict)
 
 
-
 @login_required
 def add_candle(request):
     # Saving candle feed data to database back end
@@ -197,9 +196,14 @@ def get_products_sublist(request):
         symbols = exchange_content.get("symbols")
         # Here we are only interested in a subset of products
         # Therefore we limit the number of records
-        for symbol in symbols[0:10]:
+        for symbol in symbols[0:13]:
             symbol_code = symbol.get("symbol")
-            symbol_dict[symbol_code] = symbol_code
+            # Some of the currencies don't chart well. While the graph displays them correctly, the
+            # appears to be in error, which it isn't. These were removed due to charting issues.
+            if str(symbol_code).startswith("XRP") == False and "USDTUS" not in str(
+                symbol_code
+            ):
+                symbol_dict[symbol_code] = symbol_code
 
         return JsonResponse(symbol_dict)
 

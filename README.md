@@ -176,9 +176,6 @@ without reloading the page via websockets. The page displays 24 hour ticket data
 ticker data requires a page refresh.  The price candle chart and order book information does not require a page refresh because they are connected
 to real time streaming services at Binance.
 
-**Note**
-CSS Style code exists on the index.html page. This code was originally located in `style.css`, but the animations failed to execute.
-The decision to move the code into `index.html` is a temporary one until the bug is discovered.
 #### analytics.html
 This page displays 24 hour ticker data for a selected cryptocurrency exchange. The file contains HTML and references Javascript.
 #### candle.html

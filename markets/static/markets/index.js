@@ -69,10 +69,10 @@ function loadCandleChartData(jsonObjects, records, line) {
         line.length = 0;
     }
     jsonObjects.forEach((entry, index) => {
-        console.log(entry);
+        //Process JSON objects
         let record = [];
         if (index % 50 === 0) {
-            console.log(index % 50);
+
             let i = {x: (new Date(entry[0])), y: entry[4]};
             line.push(i);
         }
@@ -470,7 +470,8 @@ function renderBidOrderRow(bidOrders) {
         if (entry.s) {
 
             const tableRow = document.createElement('tr');
-            tableRow.setAttribute("class", "new_row_fade_01");
+            tableRow.setAttribute("class", "animate__animated animate__fadeIn");
+
             const tableRowSymbol = document.createElement('td');
             const tableColKey = document.createElement('td');
             const tableColData = document.createElement('td');
@@ -496,7 +497,7 @@ function renderAskOrderRow(askOrders) {
 
             const tableRow = document.createElement('tr');
             //Class used for fade animation
-            tableRow.setAttribute("class", "new_row_fade_02");
+            tableRow.setAttribute("class", "animate__animated animate__fadeIn");
             const tableRowSymbol = document.createElement('td');
             const tableColKey = document.createElement('td');
             const tableColData = document.createElement('td');
